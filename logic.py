@@ -31,7 +31,6 @@ class Logic:
         for row in range(5, -1, -1):
             if self.array[row][y] == 0:
                 return (row, y)
-        return False
     
 
     def collumn_is_full(self, col: int) -> bool:
@@ -40,8 +39,6 @@ class Logic:
             if self.array[row][col] == 0:
                 return False
         return True
-
-
 
 
     def next_turn(self):
@@ -85,7 +82,7 @@ class Search:
         return False
 
 
-    def vertical_search(self, array:list[list[int]], turn:int, mod:bool=False) -> list[tuple[int, int]] | bool:
+    def vertical_search(self, array:list[list[int]], turn:int, mod:bool = False) -> list[tuple[int, int]] | bool:
         '''Returns the winning segment if the search finds 4 consecutive values vertically, returns False otherwise.'''
         if mod:
             range_val = range(2, 9)

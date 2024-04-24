@@ -20,18 +20,25 @@ def show_indicator(col: int):
     '''Shows the piece indicator image on top of the column.'''
     if not game.is_paused:
         if game.turn == 1:
-            image = display.red_slot
+            top_sequence = display.red_indicator
+            bottom_image = display.red_indicator_bottom
+
         elif game.turn == 2:
-            image = display.orange_slot
+            top_sequence = display.orange_indicator
+            bottom_image = display.orange_indicator_bottom
 
         if game.collumn_is_full(col):
             display.columns[col]['image'] = display.empty_space
         else:
-            display.columns[col]['image'] = image
+            display.start_animation(display.columns[col], top_sequence, 10)
+            display.slots[0][col]['image'] = bottom_image
 
 
 def hide_indicator(col: int):
     '''Removes the piece indicator image from the column.'''
+    if not game.collumn_is_full(col):
+        display.slots[0][col]['image'] = display.empty_slot
+    display.stop_animation() 
     display.columns[col]['image'] = display.empty_space
 
 
@@ -49,6 +56,7 @@ def search_and_continue(col: int):
         return
     else:
         game.next_turn()
+        hide_indicator(col)
         show_indicator(col)
 
 

@@ -12,13 +12,14 @@ class Display(tk.Tk):
     def __init__(self, theme: str = 'light'):
         super().__init__()
 
-        self.minsize(850, 800)
+        self.minsize(875, 850)
         self.title('Connect 4')
 
         # 2D list with the image labels of each slot
         self.slots = [[col for col in range(7)] for row in range(6)]
 
         self.load_images(theme)
+        self.load_image_sequences(theme)
         self.create_frames()
         self.create_layout()
 
@@ -44,7 +45,25 @@ class Display(tk.Tk):
 
         self.empty_space = tk.PhotoImage(file=f'assets/{folder}/empty_space.png')
         self.empty_space_edge = tk.PhotoImage(file=f'assets/{folder}/empty_space_edge.png')
-         
+
+        self.red_indicator_bottom = tk.PhotoImage(file=f'assets/{folder}/red_indicator_bottom.png')
+        self.orange_indicator_bottom = tk.PhotoImage(file=f'assets/{folder}/orange_indicator_bottom.png')
+
+
+    def load_image_sequences(self, theme: str):
+        self.orange_indicator = [None for i in range(10)]
+        self.red_indicator = [None for i in range(10)]
+
+        if theme == 'dark':
+            folder = 'dark_theme'
+
+        elif theme == 'light':
+            folder = 'light_theme'
+
+        for frame in range(10):
+            self.orange_indicator[frame] = tk.PhotoImage(file=f'assets/{folder}/animated/orange_indicator{frame+1}.png')
+            self.red_indicator[frame] = tk.PhotoImage(file=f'assets/{folder}/animated/red_indicator{frame+1}.png')
+
 
     def create_frames(self):
         '''Creates frames and set image files.'''
@@ -116,6 +135,24 @@ class Display(tk.Tk):
         empty_label_2.grid(row=0, column=8)
 
 
+    def start_animation(self, image_label, image_sequence:list, total_frames:int, current_frame:int = 0, fps:int = 15):
+        '''Changes the image on the image label at set interval.'''
+        image_label['image'] = image_sequence[current_frame]
+
+        if current_frame < total_frames-1:
+            current_frame += 1
+        else:
+            current_frame = 0
+
+        self.stop_id = self.after(1000//fps, self.start_animation,
+                                  image_label,
+                                  image_sequence,
+                                  total_frames,
+                                  current_frame)
+
+
+    def stop_animation(self):
+        self.after_cancel(self.stop_id)
 
 
 
@@ -163,6 +200,12 @@ class PieceView(tk.Frame):
 
 def main():
     display = Display('light')
+    
+
+
+
+
+
 
     display.mainloop()
 
