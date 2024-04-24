@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from random import randint
 
 
 class Display(tk.Tk):
@@ -52,18 +53,23 @@ class Display(tk.Tk):
 
     def load_image_sequences(self, theme: str):
         '''Creates instances of image files in a list.'''
-        self.orange_indicator = [None for i in range(10)]
-        self.red_indicator = [None for i in range(10)]
-
         if theme == 'dark':
             folder = 'dark_theme'
 
         elif theme == 'light':
             folder = 'light_theme'
 
-        for frame in range(10):
-            self.orange_indicator[frame] = tk.PhotoImage(file=f'assets/{folder}/animated/orange_indicator{frame+1}.png')
-            self.red_indicator[frame] = tk.PhotoImage(file=f'assets/{folder}/animated/red_indicator{frame+1}.png')
+        self.orange_indicator = [tk.PhotoImage(file=f'assets/{folder}/animated/orange_indicator{frame+1}.png') for frame in range(10)]
+        self.red_indicator = [tk.PhotoImage(file=f'assets/{folder}/animated/red_indicator{frame+1}.png') for frame in range(10)]
+
+        self.orange_disc_flip = [tk.PhotoImage(file=f'assets/{folder}/animated/orange_disc_flip{frame+1}.png') for frame in range(14)]
+        self.red_disc_flip = [tk.PhotoImage(file=f'assets/{folder}/animated/red_disc_flip{frame+1}.png') for frame in range(14)]
+
+        self.red_smoke_reveal = [tk.PhotoImage(file=f'assets/animated/red_smoke_reveal{frame+1}.png') for frame in range(8)]
+        self.orange_smoke_reveal = [tk.PhotoImage(file=f'assets/animated/orange_smoke_reveal{frame+1}.png') for frame in range(8)]
+
+        self.red_crown_shine = [tk.PhotoImage(file=f'assets/animated/red_crown_shine{frame+1}.png') for frame in range(12)]
+        self.orange_crown_shine = [tk.PhotoImage(file=f'assets/animated/orange_crown_shine{frame+1}.png') for frame in range(12)]
 
 
     def create_frames(self):
@@ -133,23 +139,22 @@ class Display(tk.Tk):
         ImgLabel(self.piece_view, image=self.empty_space_edge).grid(row=0, column=8)
 
 
-    def start_animation(self, image_label, image_sequence:list, fps:int = 15, current_frame:int = 0):
-        '''
-        Changes the image on the image label at set interval.\n
-        Works by recursion. 
-        '''
+    def start_animation(self, image_label, image_sequence:list, loop:bool = False, fps:int = 15, current_frame:int = 0):
+        '''Changes the image on the image label at set interval.'''
         image_label['image'] = image_sequence[current_frame]
 
         total_frames = len(image_sequence)
 
         if current_frame < total_frames-1:
             current_frame += 1
-        else:
+        elif loop:
             current_frame = 0
 
         self.stop_id = self.after(1000//fps, self.start_animation,
                                   image_label,
                                   image_sequence,
+                                  loop,
+                                  fps,
                                   current_frame)
 
 
@@ -157,11 +162,66 @@ class Display(tk.Tk):
         self.after_cancel(self.stop_id)
 
 
+    def reset_board(self, game_array: list[list[int]]):
+        '''Resets the slots one by one in a random order and plays an animation for each of them.'''
+        occupied_slots = self.get_occupied_slots(game_array)
+        self.reset_animation(occupied_slots)
+
+
+    def get_occupied_slots(self, game_array: list[list[int]]) -> list[tuple[int, int, int]]:
+        '''Returns a list of tuples containing the position of every occupied slot and the player occupying it.'''
+        occupied_slots = []
+
+        for row in range(6):
+            for col in range(7):
+                if game_array[row][col].player != 0:
+                    occupied_slots.append((row, col, game_array[row][col].player))
+
+        return occupied_slots
+
+
+    def reset_animation(self, occupied_slots:list[tuple[int, int]]):
+        '''Plays the reset animation for every occupied slot.'''
+        if occupied_slots:
+            pos = occupied_slots.pop(randint(0, len(occupied_slots)-1))
+            x, y = pos[0], pos[1]
+            player = pos[2]
+
+            if player == 1:
+                image_sequence = self.red_disc_flip
+
+            elif player == 2:
+                image_sequence = self.orange_disc_flip
+
+            self.start_animation(self.slots[x][y], image_sequence)
+
+            time = randint(25,50)
+
+            self.after(time, self.reset_animation, occupied_slots)
+
+
+    def show_winner(self, winner_segment:list[tuple[int, int]], turn: int):
+            if turn == 1:
+                image_sequence1 = self.red_smoke_reveal
+                image_sequence2 = self.red_crown_shine
+
+            elif turn == 2:
+                image_sequence1 = self.orange_smoke_reveal
+                image_sequence2 = self.orange_crown_shine
+
+            for pos in winner_segment:
+                x, y = pos[0], pos[1]
+                self.start_animation(self.slots[x][y], image_sequence1, False, 10)
+                self.after(1000, self.start_animation, self.slots[x][y], image_sequence2, True, 5)
+
+
+
+
+
+
 
 class ImgLabel(tk.Label):
-    '''
-    Creates a pre-configured label to remove boilerplate code by passing in default values.
-    '''
+    '''Creates a pre-configured label to remove boilerplate code by passing in default values.'''
     def __init__(self, parent, image):
         super().__init__(parent,
                          image=image,

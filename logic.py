@@ -10,7 +10,7 @@ class Logic:
         self.search = Search()
 
         # 2D list to hold information about each slot
-        self.array = [[0 for col in range(7)] for row in range(6)]
+        self.array = [[Slot(row, col) for col in range(7)] for row in range(6)]
 
 
     def reset(self):
@@ -22,21 +22,21 @@ class Logic:
     def update_slot(self, pos: tuple[int, int]):
         '''Assigns a player to the slot at the specified position.'''
         x, y = pos[0], pos[1]
-        self.array[x][y] = self.turn
+        self.array[x][y].player = self.turn
 
 
     def find_bottom(self, pos: tuple[int, int]) -> tuple[int, int] | bool:
         '''Returns the coordinates of the bottomost slot the piece can fall to.'''
         y = pos[1]
         for row in range(5, -1, -1):
-            if self.array[row][y] == 0:
+            if self.array[row][y].player == 0:
                 return (row, y)
     
 
     def collumn_is_full(self, col: int) -> bool:
         '''Returns True if the specified column is full, returns False otherwise.'''
         for row in range(6):
-            if self.array[row][col] == 0:
+            if self.array[row][col].player == 0:
                 return False
         return True
 
@@ -49,18 +49,25 @@ class Logic:
             self.turn = 1
 
 
-    def search_winner(self):
+    def search_winner(self) -> list[tuple[int, int]] | bool:
         '''Searches every row and column for a winner.'''
         if segment := self.search.horizontal_search(self.array, self.turn):
-            return True
+            return segment
         elif segment := self.search.vertical_search(self.array, self.turn):
-            return True
+            return segment
         elif segment := self.search.diagonal_search(self.array, self.turn):
-            return True
+            return segment
         elif segment := self.search.mirrored_diagonal_search(self.array, self.turn):
-            return True
+            return segment
         else:
             return False
+
+
+class Slot:
+    '''Holds information about a slot in the grid.'''
+    def __init__(self, x: int, y: int):
+        self.pos = [x,y]
+        self.player = 0
 
 
 class Search:
@@ -71,9 +78,9 @@ class Search:
         for row in range(6):
             counter = 0
             for col in range(7):
-                if array[row][col] == turn:
+                if array[row][col].player == turn:
                     counter += 1
-                    self.segment.append((row,col))
+                    self.segment.append(array[row][col].pos)
                 else:
                     counter = 0
                     self.segment = []
@@ -92,9 +99,9 @@ class Search:
         for col in range_val:
             counter = 0
             for row in range(6):
-                if array[row][col] == turn:
+                if array[row][col] != 0 and array[row][col].player == turn:
                     counter += 1
-                    self.segment.append((row, col))
+                    self.segment.append(array[row][col].pos)
                 else:
                     counter = 0
                     self.segment = []
