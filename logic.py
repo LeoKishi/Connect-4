@@ -52,12 +52,16 @@ class Logic:
     def search_winner(self) -> list[tuple[int, int]] | bool:
         '''Searches every row and column for a winner.'''
         if segment := self.search.horizontal_search(self.array, self.turn):
+            print('horizontal')
             return segment
         elif segment := self.search.vertical_search(self.array, self.turn):
+            print('vertical')
             return segment
         elif segment := self.search.diagonal_search(self.array, self.turn):
+            print('diagonal')
             return segment
         elif segment := self.search.mirrored_diagonal_search(self.array, self.turn):
+            print('mirrored diagonal')
             return segment
         else:
             return False
@@ -75,9 +79,9 @@ class Search:
 
     def horizontal_search(self, array:list[list[int]], turn:int) -> list[tuple[int, int]] | bool:
         '''Returns the winning segment if the search finds 4 consecutive values horizontally, returns False otherwise.'''
-        self.segment = []
         for row in range(6):
             counter = 0
+            self.segment = []
             for col in range(7):
                 if array[row][col].player == turn:
                     counter += 1
@@ -92,16 +96,11 @@ class Search:
 
     def vertical_search(self, array:list[list[int]], turn:int, mod:bool = False) -> list[tuple[int, int]] | bool:
         '''Returns the winning segment if the search finds 4 consecutive values vertically, returns False otherwise.'''
-        if mod:
-            range_val = range(2, 9)
-        else:
-            range_val = range(7)
-
-        self.segment = []
-        for col in range_val:
+        for col in range(7):
             counter = 0
+            self.segment = []
             for row in range(6):
-                if array[row][col] != 0 and array[row][col].player == turn:
+                if array[row][col].player == turn:
                     counter += 1
                     self.segment.append(array[row][col].pos)
                 else:
@@ -129,7 +128,19 @@ class Search:
             inv_counter += 1
 
         # vertical search
-        return self.vertical_search(array_copy, turn, mod=True)
+        for col in range(2, 9):
+            counter = 0
+            self.segment = []
+            for row in range(6):
+                if array_copy[row][col] != 0 and array_copy[row][col].player ==  turn:
+                    counter += 1
+                    self.segment.append(array_copy[row][col].pos)
+                else:
+                    counter = 0
+                    self.segment = []
+                if counter >= 4:
+                    return self.segment
+        return False
 
 
     def mirrored_diagonal_search(self, array:list[list[int]], turn:int) -> list[tuple[int, int]] | bool:
@@ -149,9 +160,19 @@ class Search:
             inv_counter += 1
 
         # vertical search
-        return self.vertical_search(array_copy, turn, mod=True)
-
-
+        for col in range(2, 9):
+            counter = 0
+            self.segment = []
+            for row in range(6):
+                if array_copy[row][col] != 0 and array_copy[row][col].player ==  turn:
+                    counter += 1
+                    self.segment.append(array_copy[row][col].pos)
+                else:
+                    counter = 0
+                    self.segment = []
+                if counter >= 4:
+                    return self.segment
+        return False
 
 
 if __name__ == '__main__':

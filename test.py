@@ -49,20 +49,19 @@ def reset_game(spacebar_pressed: bool):
         display.stop_animation()
         display.reset_board(game.array)
         
-        delay = len(display.get_occupied_slots(game.array))*50 + 500
-        display.after(delay, unpause)
+        display.after(1100, unpause)
 
         display.reset()
         game.reset()
-    ...
 
 
-
-
-# binding user input
-display.bind_click_event(action)
-display.bind_hover_event(show=show_indicator, hide=hide_indicator)
-display.bind_spacebar_event(reset_game)
+def winner_found(row:int, col:int, segment:list[list[int,int]]):
+    '''Stops the game and shows the winner.'''
+    print(f'{game.color[game.turn]} wins!')
+    hide_indicator(col)
+    display.show_winner(segment, game.turn)
+    display.after(1650, enable_reset)
+    game.is_paused = True
 
 
 def search_and_continue(row: int, col: int):
@@ -76,21 +75,21 @@ def search_and_continue(row: int, col: int):
         show_indicator(col)
 
 
-def winner_found(row:int, col:int, segment:list[list[int,int]]):
-    '''Stops the game and shows the winner.'''
-    print(f'{game.color[game.turn]} wins!')
-    hide_indicator(col)
-    display.show_winner(segment, game.turn)
-    display.after(1650, enable_reset)
-    game.is_paused = True
-
-
 def enable_reset():
     game.can_reset = True
 
-
 def unpause():
     game.is_paused = False
+
+
+
+# binding user input
+display.bind_click_event(action)
+display.bind_hover_event(show=show_indicator, hide=hide_indicator)
+display.bind_spacebar_event(reset_game)
+
+
+
 
 
 if __name__ == '__main__':

@@ -71,8 +71,8 @@ class Display(tk.Tk):
         self.red_smoke_reveal = [tk.PhotoImage(file=f'assets/animated/red_smoke_reveal{frame+1}.png') for frame in range(8)]
         self.orange_smoke_reveal = [tk.PhotoImage(file=f'assets/animated/orange_smoke_reveal{frame+1}.png') for frame in range(8)]
 
-        self.red_crown_shine = [tk.PhotoImage(file=f'assets/animated/red_crown_shine{frame+1}.png') for frame in range(12)]
-        self.orange_crown_shine = [tk.PhotoImage(file=f'assets/animated/orange_crown_shine{frame+1}.png') for frame in range(12)]
+        self.red_crown_shine = [tk.PhotoImage(file=f'assets/animated/red_crown_shine{frame+1}.png') for frame in range(16)]
+        self.orange_crown_shine = [tk.PhotoImage(file=f'assets/animated/orange_crown_shine{frame+1}.png') for frame in range(16)]
 
 
     def create_frames(self):
@@ -197,8 +197,7 @@ class Display(tk.Tk):
 
     def reset_animation(self, occupied_slots:list[tuple[int, int]]):
         '''Plays the reset animation for every occupied slot.'''
-        if occupied_slots:
-            pos = occupied_slots.pop(randint(0, len(occupied_slots)-1))
+        for pos in occupied_slots:
             x, y = pos[0], pos[1]
             player = pos[2]
 
@@ -208,8 +207,6 @@ class Display(tk.Tk):
                 image_sequence = self.orange_disc_flip
 
             self.start_animation(self.slots[x][y], image_sequence)
-
-            self.after(0, self.reset_animation, occupied_slots)
 
 
     def show_winner(self, winner_segment:list[tuple[int, int]], turn: int):
@@ -224,7 +221,7 @@ class Display(tk.Tk):
             for pos in winner_segment:
                 x, y = pos[0], pos[1]
                 self.start_animation(self.slots[x][y], image_sequence1, False, 12)
-                self.after(500, self.start_animation, self.slots[x][y], image_sequence2, False, 12)
+                self.after(500, self.start_animation, self.slots[x][y], image_sequence2, True, 6)
 
 
     def store_id(self, identifier: str):
