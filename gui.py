@@ -12,7 +12,7 @@ class Display(tk.Tk):
     def __init__(self, theme: str = 'light'):
         super().__init__()
 
-        self.minsize(900, 800)
+        self.minsize(850, 800)
         self.title('Connect 4')
 
         # 2D list with the image labels of each slot
@@ -41,7 +41,10 @@ class Display(tk.Tk):
         self.red_slot = tk.PhotoImage(file=f'assets/{folder}/red_slot.png')
         self.empty_slot = tk.PhotoImage(file=f'assets/{folder}/empty_slot.png') 
         self.orange_slot = tk.PhotoImage(file=f'assets/{folder}/orange_slot.png')
-        
+
+        self.empty_space = tk.PhotoImage(file=f'assets/{folder}/empty_space.png')
+        self.empty_space_edge = tk.PhotoImage(file=f'assets/{folder}/empty_space_edge.png')
+         
 
     def create_frames(self):
         '''Creates frames and set image files.'''
@@ -53,32 +56,43 @@ class Display(tk.Tk):
         self.right_wall_frame = Wall(self.center_frame, self.right_wall).pack(side=tk.LEFT)
         self.bottom_wall_frame = Wall(self.main_frame, self.bottom_wall)
 
+        self.create_piece_view()
+
 
     def create_layout(self):
         '''Places the frames in the screen.'''
+        self.piece_view.pack(side=tk.TOP, fill='none', expand=False)
         self.top_wall_frame.pack(side=tk.TOP)
         self.center_frame.pack(side=tk.TOP)
         self.bottom_wall_frame.pack(side=tk.TOP)
         self.main_frame.pack(fill='none', expand=True)
 
 
-    def bind_function(self, func):
+    def bind_click_event(self, action):
         '''
         Binds a mouse click event to each slot.\n
         The event calls the specified function and passes in the coordinates of the clicked slot.
         '''
         for row in range(6):
             for col in range(7):
-                self.slots[row][col].bind('<Button-1>', lambda event, x=row, y=col: func(x,y))
+                self.slots[row][col].bind('<Button-1>', lambda event, x=row, y=col: action(x,y))
 
 
-    def fill_slot(self, pos: tuple[int, int], color: str):
+    def bind_hover_event(self, show, hide):
+        '''Binds a hover event fo every slot.'''
+        for row in range(6):
+            for col in range(7):
+                self.slots[row][col].bind('<Enter>', lambda event, col=col: show(col))
+                self.slots[row][col].bind('<Leave>', lambda event, col=col: hide(col))
+
+
+    def fill_slot(self, pos: tuple[int, int], turn: int):
         '''Places a piece of the specified color at the specified position.'''
         x, y = pos[0], pos[1]
 
-        if color == 'Red':
+        if turn == 1:
             image = self.red_slot
-        elif color == 'Orange':
+        elif turn == 2:
             image = self.orange_slot
 
         self.slots[x][y]['image'] = image
@@ -90,8 +104,26 @@ class Display(tk.Tk):
                 self.slots[row][col]['image'] = self.empty_slot
 
 
+    def create_piece_view(self):
+        '''Creates the frame for the piece indicator.'''
+        self.columns = [None for col in range(7)]
+        self.piece_view = PieceView(self.main_frame, self.empty_space, self.columns)
+
+        empty_label_1 = tk.Label(self.piece_view, image=self.empty_space_edge, relief=tk.FLAT, borderwidth=0, highlightthickness=0)
+        empty_label_2 = tk.Label(self.piece_view, image=self.empty_space_edge, relief=tk.FLAT, borderwidth=0, highlightthickness=0)
+
+        empty_label_1.grid(row=0, column=0)
+        empty_label_2.grid(row=0, column=8)
+
+
+
+
+
+
+
+
 class Grid(tk.Frame):
-    '''Creates a frame and places a grid of buttons inside of it.'''
+    '''Creates a frame and places a grid of image labels inside of it.'''
     def __init__(self, parent, image, slots: list[list[int]]):
         super().__init__(parent)
         for row in range(6):
@@ -108,16 +140,24 @@ class Wall(tk.Frame):
     '''Creates a frame and places an image inside of it.'''
     def __init__(self, parent, image):
         super().__init__(parent)
-        self.label = tk.Label(self,
-                              image=image,
-                              relief=tk.FLAT,
-                              borderwidth=0,
-                              highlightthickness=0)
-        self.label.pack()
+        tk.Label(self,
+                 image=image,
+                 relief=tk.FLAT,
+                 borderwidth=0,
+                 highlightthickness=0).pack()
 
 
-
-
+class PieceView(tk.Frame):
+    '''Creates a frame and places a grid of image labels inside of it.'''
+    def __init__(self, parent, image, columns: list[list[int]]):
+        super().__init__(parent)
+        for col in range(7):
+            columns[col] = tk.Label(self,
+                                        image=image,
+                                        relief=tk.FLAT,
+                                        borderwidth=0,
+                                        highlightthickness=0)
+            columns[col].grid(row=0, column=col+1)
 
 
 

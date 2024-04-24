@@ -19,7 +19,7 @@ class Logic:
         self.create_slots()
 
 
-    def assign_player(self, pos: tuple[int, int]):
+    def update_slot(self, pos: tuple[int, int]):
         '''Assigns a player to the slot at the specified position.'''
         x, y = pos[0], pos[1]
         self.array[x][y] = self.turn
@@ -32,6 +32,16 @@ class Logic:
             if self.array[row][y] == 0:
                 return (row, y)
         return False
+    
+
+    def collumn_is_full(self, col: int) -> bool:
+        '''Returns True if the specified column is full, returns False otherwise.'''
+        for row in range(6):
+            if self.array[row][col] == 0:
+                return False
+        return True
+
+
 
 
     def next_turn(self):
