@@ -11,10 +11,11 @@ class Display(tk.Tk):
     '''
     def __init__(self, mode: str = 'light'):
         super().__init__()
+
         self.minsize(900, 800)
         self.title('Connect 4')
 
-        # list that holds the image labels of the slots
+        # 2D list with the image labels of each slot
         self.slots = [[col for col in range(7)] for row in range(6)]
 
         self.load_images(mode)
@@ -41,6 +42,7 @@ class Display(tk.Tk):
         self.empty_slot = tk.PhotoImage(file=f'assets/{folder}/empty_slot.png') 
         self.orange_slot = tk.PhotoImage(file=f'assets/{folder}/orange_slot.png')
         
+
     def create_frames(self):
         '''Creates the frames with the image files.'''
         self.top_wall_frame = Wall(self, self.top_wall)
@@ -50,31 +52,48 @@ class Display(tk.Tk):
         self.right_wall_frame = Wall(self.center_frame, self.right_wall).pack(side=tk.LEFT)
         self.bottom_wall_frame = Wall(self, self.bottom_wall)
 
+
     def create_layout(self):
         '''Places the frames in the screen.'''
         self.top_wall_frame.pack(side=tk.TOP)
         self.center_frame.pack(side=tk.TOP)
         self.bottom_wall_frame.pack(side=tk.TOP)
 
+
     def bind_function(self, func):
         '''
         Binds a mouse click event to each slot.\n
-        The event calls the function and passes in the coordinates of the clicked slot.
+        The event calls the specified function and passes in the coordinates of the clicked slot.
         '''
         for row in range(6):
             for col in range(7):
                 self.slots[row][col].bind('<Button-1>', lambda event, x=row, y=col: func(x,y))
 
 
+    def fill_slot(self, pos: tuple[int, int], color: str):
+        '''Places a piece of the specified color at the specified position.'''
+        x, y = pos[0], pos[1]
+
+        if color == 'red':
+            image = self.red_slot
+        elif color == 'orange':
+            image = self.orange_slot
+
+        self.slots[x][y]['image'] = image
+
+
+    def reset(self):
+        for row in range(6):
+            for col in range(7):
+                self.slots[row][col]['image'] = self.empty_slot
+
+
 class Grid(tk.Frame):
     '''Creates a frame and places a grid of buttons inside of it.'''
     def __init__(self, parent, image, slots: list[list[int]]):
         super().__init__(parent)
-        height = 6
-        width = 7
-
-        for row in range(height):
-            for col in range(width):
+        for row in range(6):
+            for col in range(7):
                 slots[row][col] = tk.Label(self,
                                            image=image,
                                            relief=tk.FLAT,
