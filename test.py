@@ -30,7 +30,7 @@ def show_indicator(col: int):
         if game.collumn_is_full(col):
             display.columns[col]['image'] = display.empty_space
         else:
-            display.start_animation(display.columns[col], top_sequence, 10)
+            display.start_animation(display.columns[col], top_sequence)
             display.slots[0][col]['image'] = bottom_image
 
 

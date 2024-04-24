@@ -133,9 +133,14 @@ class Display(tk.Tk):
         ImgLabel(self.piece_view, image=self.empty_space_edge).grid(row=0, column=8)
 
 
-    def start_animation(self, image_label, image_sequence:list, total_frames:int, current_frame:int = 0, fps:int = 15):
-        '''Changes the image on the image label at set interval.'''
+    def start_animation(self, image_label, image_sequence:list, fps:int = 15, current_frame:int = 0):
+        '''
+        Changes the image on the image label at set interval.\n
+        Works by recursion. 
+        '''
         image_label['image'] = image_sequence[current_frame]
+
+        total_frames = len(image_sequence)
 
         if current_frame < total_frames-1:
             current_frame += 1
@@ -145,7 +150,6 @@ class Display(tk.Tk):
         self.stop_id = self.after(1000//fps, self.start_animation,
                                   image_label,
                                   image_sequence,
-                                  total_frames,
                                   current_frame)
 
 
