@@ -19,6 +19,9 @@ class Display(tk.Tk):
         # 2D list with the image labels of each slot
         self.slots = [[col for col in range(7)] for row in range(6)]
 
+        # list to hold after functions identifiers
+        self.stop_ids = []
+
         self.load_images(theme)
         self.load_image_sequences(theme)
         self.create_frames()
@@ -112,6 +115,12 @@ class Display(tk.Tk):
                 self.slots[row][col].bind('<Leave>', lambda event, col=col: hide(col))
 
 
+    def bind_spacebar_event(self, reset):
+        '''Binds a spacebar key press event.'''
+        self.bind('<Key>', lambda event: reset(True if event.keysym == 'space' else False))
+
+
+
     def fill_slot(self, pos: tuple[int, int], turn: int):
         '''Places a piece of the specified color at the specified position.'''
         x, y = pos[0], pos[1]
@@ -139,7 +148,7 @@ class Display(tk.Tk):
         ImgLabel(self.piece_view, image=self.empty_space_edge).grid(row=0, column=8)
 
 
-    def start_animation(self, image_label, image_sequence:list, loop:bool = False, fps:int = 15, current_frame:int = 0):
+    def start_animation(self, image_label, image_sequence:list, loop:bool = False, fps:int = 15, current_frame:int = 0) -> bool:
         '''Changes the image on the image label at set interval.'''
         image_label['image'] = image_sequence[current_frame]
 
@@ -149,17 +158,23 @@ class Display(tk.Tk):
             current_frame += 1
         elif loop:
             current_frame = 0
+        else:
+            return True
 
-        self.stop_id = self.after(1000//fps, self.start_animation,
+        stop_id = self.after(1000//fps, self.start_animation,
                                   image_label,
                                   image_sequence,
                                   loop,
                                   fps,
                                   current_frame)
 
+        if loop:
+            self.store_id(stop_id)
+
 
     def stop_animation(self):
-        self.after_cancel(self.stop_id)
+        for i in self.stop_ids:
+            self.after_cancel(i)
 
 
     def reset_board(self, game_array: list[list[int]]):
@@ -189,15 +204,12 @@ class Display(tk.Tk):
 
             if player == 1:
                 image_sequence = self.red_disc_flip
-
             elif player == 2:
                 image_sequence = self.orange_disc_flip
 
             self.start_animation(self.slots[x][y], image_sequence)
 
-            time = randint(25,50)
-
-            self.after(time, self.reset_animation, occupied_slots)
+            self.after(0, self.reset_animation, occupied_slots)
 
 
     def show_winner(self, winner_segment:list[tuple[int, int]], turn: int):
@@ -211,11 +223,13 @@ class Display(tk.Tk):
 
             for pos in winner_segment:
                 x, y = pos[0], pos[1]
-                self.start_animation(self.slots[x][y], image_sequence1, False, 10)
-                self.after(1000, self.start_animation, self.slots[x][y], image_sequence2, True, 5)
+                self.start_animation(self.slots[x][y], image_sequence1, False, 12)
+                self.after(500, self.start_animation, self.slots[x][y], image_sequence2, False, 12)
 
 
-
+    def store_id(self, identifier: str):
+        '''Stores the after functions identifiers.'''
+        self.stop_ids.append(identifier)
 
 
 

@@ -6,6 +6,7 @@ class Logic:
     def __init__(self):
         self.turn = randint(1,2)
         self.is_paused = False
+        self.can_reset = False
         self.color = {1:'Red', 2:'Orange'}
         self.search = Search()
 
@@ -15,8 +16,7 @@ class Logic:
 
     def reset(self):
         self.turn = randint(1,2)
-        self.is_paused = False
-        self.create_slots()
+        self.array = [[Slot(row, col) for col in range(7)] for row in range(6)]
 
 
     def update_slot(self, pos: tuple[int, int]):
@@ -75,6 +75,7 @@ class Search:
 
     def horizontal_search(self, array:list[list[int]], turn:int) -> list[tuple[int, int]] | bool:
         '''Returns the winning segment if the search finds 4 consecutive values horizontally, returns False otherwise.'''
+        self.segment = []
         for row in range(6):
             counter = 0
             for col in range(7):
@@ -96,6 +97,7 @@ class Search:
         else:
             range_val = range(7)
 
+        self.segment = []
         for col in range_val:
             counter = 0
             for row in range(6):

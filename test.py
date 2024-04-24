@@ -43,9 +43,26 @@ def hide_indicator(col: int):
         display.columns[col]['image'] = display.empty_space
 
 
+def reset_game(spacebar_pressed: bool):
+    if spacebar_pressed and game.can_reset:
+        game.can_reset = False
+        display.stop_animation()
+        display.reset_board(game.array)
+        
+        delay = len(display.get_occupied_slots(game.array))*50 + 500
+        display.after(delay, unpause)
+
+        display.reset()
+        game.reset()
+    ...
+
+
+
+
 # binding user input
 display.bind_click_event(action)
 display.bind_hover_event(show=show_indicator, hide=hide_indicator)
+display.bind_spacebar_event(reset_game)
 
 
 def search_and_continue(row: int, col: int):
@@ -61,16 +78,19 @@ def search_and_continue(row: int, col: int):
 
 def winner_found(row:int, col:int, segment:list[list[int,int]]):
     '''Stops the game and shows the winner.'''
+    print(f'{game.color[game.turn]} wins!')
     hide_indicator(col)
+    display.show_winner(segment, game.turn)
+    display.after(1650, enable_reset)
     game.is_paused = True
 
-    print(f'{game.color[game.turn]} wins!')
-    
-    display.show_winner(segment, game.turn)
-    #display.reset_board(game.array)
-    
+
+def enable_reset():
+    game.can_reset = True
 
 
+def unpause():
+    game.is_paused = False
 
 
 if __name__ == '__main__':
