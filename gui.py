@@ -25,7 +25,7 @@ class Display(tk.Tk):
 
 
     def load_images(self, theme: str):
-        '''Creates instances of the image files.'''
+        '''Creates instances of image files.'''
         if theme == 'dark':
             folder = 'dark_theme'
             self.configure(bg= '#201e23')
@@ -51,6 +51,7 @@ class Display(tk.Tk):
 
 
     def load_image_sequences(self, theme: str):
+        '''Creates instances of image files in a list.'''
         self.orange_indicator = [None for i in range(10)]
         self.red_indicator = [None for i in range(10)]
 
@@ -128,11 +129,8 @@ class Display(tk.Tk):
         self.columns = [None for col in range(7)]
         self.piece_view = PieceView(self.main_frame, self.empty_space, self.columns)
 
-        empty_label_1 = tk.Label(self.piece_view, image=self.empty_space_edge, relief=tk.FLAT, borderwidth=0, highlightthickness=0)
-        empty_label_2 = tk.Label(self.piece_view, image=self.empty_space_edge, relief=tk.FLAT, borderwidth=0, highlightthickness=0)
-
-        empty_label_1.grid(row=0, column=0)
-        empty_label_2.grid(row=0, column=8)
+        ImgLabel(self.piece_view, image=self.empty_space_edge).grid(row=0, column=0)
+        ImgLabel(self.piece_view, image=self.empty_space_edge).grid(row=0, column=8)
 
 
     def start_animation(self, image_label, image_sequence:list, total_frames:int, current_frame:int = 0, fps:int = 15):
@@ -156,7 +154,16 @@ class Display(tk.Tk):
 
 
 
-
+class ImgLabel(tk.Label):
+    '''
+    Creates a pre-configured label to remove boilerplate code by passing in default values.
+    '''
+    def __init__(self, parent, image):
+        super().__init__(parent,
+                         image=image,
+                         relief=tk.FLAT,
+                         borderwidth=0,
+                         highlightthickness=0)
 
 
 class Grid(tk.Frame):
@@ -165,11 +172,7 @@ class Grid(tk.Frame):
         super().__init__(parent)
         for row in range(6):
             for col in range(7):
-                slots[row][col] = tk.Label(self,
-                                           image=image,
-                                           relief=tk.FLAT,
-                                           borderwidth=0,
-                                           highlightthickness=0)
+                slots[row][col] = ImgLabel(self, image)
                 slots[row][col].grid(row=row, column=col)
 
 
@@ -177,11 +180,7 @@ class Wall(tk.Frame):
     '''Creates a frame and places an image inside of it.'''
     def __init__(self, parent, image):
         super().__init__(parent)
-        tk.Label(self,
-                 image=image,
-                 relief=tk.FLAT,
-                 borderwidth=0,
-                 highlightthickness=0).pack()
+        ImgLabel(self, image).pack()
 
 
 class PieceView(tk.Frame):
@@ -189,11 +188,7 @@ class PieceView(tk.Frame):
     def __init__(self, parent, image, columns: list[list[int]]):
         super().__init__(parent)
         for col in range(7):
-            columns[col] = tk.Label(self,
-                                        image=image,
-                                        relief=tk.FLAT,
-                                        borderwidth=0,
-                                        highlightthickness=0)
+            columns[col] = ImgLabel(self, image)
             columns[col].grid(row=0, column=col+1)
 
 
