@@ -9,7 +9,7 @@ class Display(tk.Tk):
         mode
             'dark' for dark mode. Light mode by default
     '''
-    def __init__(self, mode: str = 'light'):
+    def __init__(self, theme: str = 'light'):
         super().__init__()
 
         self.minsize(900, 800)
@@ -18,19 +18,19 @@ class Display(tk.Tk):
         # 2D list with the image labels of each slot
         self.slots = [[col for col in range(7)] for row in range(6)]
 
-        self.load_images(mode)
+        self.load_images(theme)
         self.create_frames()
         self.create_layout()
 
 
-    def load_images(self, mode: str):
+    def load_images(self, theme: str):
         '''Creates instances of the image files.'''
-        if mode == 'dark':
-            folder = 'dark_mode'
+        if theme == 'dark':
+            folder = 'dark_theme'
             self.configure(bg= '#201e23')
 
-        elif mode == 'light':
-            folder = 'light_mode'
+        elif theme == 'light':
+            folder = 'light_theme'
             self.configure(bg= 'white')
 
         self.top_wall = tk.PhotoImage(file=f'assets/{folder}/top_wall.png')
@@ -44,13 +44,14 @@ class Display(tk.Tk):
         
 
     def create_frames(self):
-        '''Creates the frames with the image files.'''
-        self.top_wall_frame = Wall(self, self.top_wall)
-        self.center_frame = tk.Frame(self)
+        '''Creates frames and set image files.'''
+        self.main_frame = tk.Frame(self)
+        self.top_wall_frame = Wall(self.main_frame, self.top_wall)
+        self.center_frame = tk.Frame(self.main_frame)
         self.left_wall_frame = Wall(self.center_frame, self.left_wall).pack(side=tk.LEFT)
         self.grid = Grid(self.center_frame, self.empty_slot, self.slots).pack(side=tk.LEFT)
         self.right_wall_frame = Wall(self.center_frame, self.right_wall).pack(side=tk.LEFT)
-        self.bottom_wall_frame = Wall(self, self.bottom_wall)
+        self.bottom_wall_frame = Wall(self.main_frame, self.bottom_wall)
 
 
     def create_layout(self):
@@ -58,6 +59,7 @@ class Display(tk.Tk):
         self.top_wall_frame.pack(side=tk.TOP)
         self.center_frame.pack(side=tk.TOP)
         self.bottom_wall_frame.pack(side=tk.TOP)
+        self.main_frame.pack(fill='none', expand=True)
 
 
     def bind_function(self, func):
@@ -74,9 +76,9 @@ class Display(tk.Tk):
         '''Places a piece of the specified color at the specified position.'''
         x, y = pos[0], pos[1]
 
-        if color == 'red':
+        if color == 'Red':
             image = self.red_slot
-        elif color == 'orange':
+        elif color == 'Orange':
             image = self.orange_slot
 
         self.slots[x][y]['image'] = image

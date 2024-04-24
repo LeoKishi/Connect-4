@@ -6,7 +6,7 @@ class Logic:
     def __init__(self):
         self.turn = randint(1,2)
         self.is_paused = False
-        self.COLOR = {1:'red', 2:'orange'}
+        self.color = {1:'Red', 2:'Orange'}
         self.search = Search()
 
         # 2D list to hold information about each slot
