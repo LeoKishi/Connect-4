@@ -2,7 +2,7 @@ from gui import Display
 from logic import Logic
 
 
-display = Display(theme='dark')
+display = Display(theme='light')
 game = Logic()
 
 
