@@ -5,6 +5,7 @@ from copy import deepcopy
 class Logic:
     def __init__(self):
         self.turn = randint(1,2)
+        self.move_count = 0
         self.is_paused = False
         self.can_reset = False
         self.color = {1:'Red', 2:'Orange'}
@@ -16,6 +17,7 @@ class Logic:
 
     def reset(self):
         self.turn = randint(1,2)
+        self.move_count = 0
         self.array = [[Slot(row, col) for col in range(7)] for row in range(6)]
 
 
@@ -41,12 +43,18 @@ class Logic:
         return True
 
 
-    def next_turn(self):
-        '''Alternate between players.'''
+    def next_turn(self) -> bool:
+        '''Returns true if the game continues to the next turn, returns false if there are no more valid moves.'''
+        self.move_count += 1
+        if self.move_count == 42:
+            return False
+
         if self.turn == 1:
             self.turn = 2
         else:
             self.turn = 1
+        return True
+        
 
 
     def search_winner(self) -> list[tuple[int, int]] | bool:

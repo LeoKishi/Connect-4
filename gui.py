@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 from random import randint
+from random import choice
+from playsound import playsound
 
 
 class Display(tk.Tk):
@@ -110,8 +112,6 @@ class Display(tk.Tk):
         self.center_frame.pack(side=tk.BOTTOM)
         self.top_wall_frame.pack(side=tk.BOTTOM)
         
-        
-
 
     def bind_click_event(self, action):
         '''
@@ -145,6 +145,11 @@ class Display(tk.Tk):
         elif turn == 2:
             image = self.orange_slot
 
+        sounds = ['assets/click1.wav',
+                  'assets/click2.wav',
+                  'assets/click3.wav']
+
+        playsound(choice(sounds), block=False)
         self.slots[x][y]['image'] = image
 
 
@@ -234,6 +239,8 @@ class Display(tk.Tk):
             image_sequence1 = self.orange_smoke_reveal
             image_sequence2 = self.orange_crown_shine
 
+        playsound('assets/crown.wav', block=False)
+
         for pos in winner_segment:
             x, y = pos[0], pos[1]
             self.start_animation(self.slots[x][y], image_sequence1, False, 12)
@@ -245,10 +252,17 @@ class Display(tk.Tk):
         self.stop_ids.append(identifier)
 
 
-    def show_play_again(self, player: str):
+    def show_play_again(self, winner: str):
         '''Show the play again text.'''
+        if winner == 0:
+            self.top_frame.winner['text'] = 'Tie!'
+
+        if winner == 1:
+            self.top_frame.winner['text'] = 'Red wins!'
+        elif winner == 2:
+            self.top_frame.winner['text'] = 'Orange wins!'
+
         self.piece_view.pack_forget()
-        self.top_frame.winner['text'] = f'{player} wins!'
         self.top_frame.pack(side=tk.TOP, fill='both', expand=True)
         self.top_frame.pack_propagate(0)
 
@@ -257,9 +271,6 @@ class Display(tk.Tk):
         '''Hides the play again text.'''
         self.top_frame.pack_forget()
         self.piece_view.pack(side=tk.TOP, fill='none', expand=False)
-
-
-
 
 
 class ImgLabel(tk.Label):
@@ -304,15 +315,13 @@ class TextLabel(tk.Frame):
         super().__init__(parent, height=125, bg=bg)
         self.winner = tk.Label(self,
                                font=('Calibri', 15),
-                               bg=bg,
-                               fg=fg)
+                               bg=bg, fg=fg)
         self.winner.pack(pady=(30,0))
 
         self.play_again = tk.Label(self,
                                    text='Press SPACE to play again',
                                    font=('Calibri', 12),
-                                   bg=bg,
-                                   fg=fg)
+                                   bg=bg, fg=fg)
         self.play_again.pack(pady=(30,0))
 
 

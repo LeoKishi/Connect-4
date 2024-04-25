@@ -2,7 +2,7 @@ from gui import Display
 from logic import Logic
 
 
-display = Display(theme='light')
+display = Display(theme='dark')
 game = Logic()
 
 
@@ -60,7 +60,7 @@ def reset_game(spacebar_pressed: bool):
 def winner_found(row:int, col:int, segment:list[list[int,int]]):
     '''Stops the game and shows the winner.'''
     hide_indicator(col)
-    display.show_play_again(game.color[game.turn])
+    display.show_play_again(game.turn)
     display.show_winner(segment, game.turn)
     display.after(1650, enable_reset)
     game.is_paused = True
@@ -72,9 +72,14 @@ def search_and_continue(row: int, col: int):
         winner_found(row, col, segment)
         return
     else:
-        game.next_turn()
-        hide_indicator(col)
-        show_indicator(col)
+        if game.next_turn():
+            hide_indicator(col)
+            show_indicator(col)
+        else:
+            hide_indicator(col)
+            display.show_play_again(0)
+            enable_reset()
+            game.is_paused = True
 
 
 def enable_reset():
