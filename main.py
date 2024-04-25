@@ -1,184 +1,105 @@
-import tkinter as tk
-import random
-import wincondition
+from gui import Display
+from logic import Logic
 
-class Button:
-    def __init__(self):
-        self.height = 6
-        self.width = 7
-        self.buttons = [[col for col in range(self.width)] for row in range(self.height)] # tkinter buttons
-        self.array = [[col for col in range(self.width)] for row in range(self.height)]
-        for row in range(self.height):
-            for col in range(self.width):
-                self.array[row][col] = 0
-                self.array[row][col] = Square(row, col) # turning array elements into class to hold information
-                self.buttons[row][col] = tk.Button(grid,
-                                                    font= ('', '20', 'bold'),
-                                                    height= 1, width= 3,
-                                                    relief= tk.SUNKEN,
-                                                    borderwidth= 6,
-                                                    bg= '#79abf2',
-                                                    command= (lambda x=row, y=col: control.select(x,y)))
-                self.buttons[row][col].grid(row=row+1,column=col, padx=(3,3), pady=(3,3))
-                self.buttons[row][col].bind('<Enter>', lambda event, column=col: visual.show_next_piece(column))
-                self.buttons[row][col].bind('<Leave>', lambda event, column=col: visual.hide_next_piece(column))
 
-class Square:
-    def __init__(self, x, y):
-        self.pos = [x,y] # position in the array
-        self.player = None # which player is occupying this square
+display = Display(theme='dark')
+game = Logic()
 
-    def get_pos(self):
-        return self.pos
 
-class Control:
-    def __init__(self):
-        self.turn = random.randint(1,2) # randomize first turn / 1 for player 1 and 2 for player 2
+def action(row: int, col: int):
+    '''Places a piece in the selected column.'''
+    if not game.is_paused:
+        if not game.collumn_is_full(col):
+            pos = game.find_bottom((row, col))
+            display.fill_slot(pos, game.turn)
+            game.update_slot(pos)
+            search_and_continue(row,col)
 
-    def select(self, x, y): # chooses the bottom-most available square in the selected colummn
-        for col in range((button.height-1), -1, -1):
-            if button.array[col][y].player == None:
-                self.move(col, y)
-                return
 
-    def move(self, x, y): # place a piece in the selected square
-        # player 1 (red)
-        if self.turn == 1:
-            button.array[x][y].player = 1
-            button.buttons[x][y]['bg'] = 'red'
-            if (search.search_winner(button.array, self.turn) == True):
-                self.pause()
-                visual.blink_segment(search.winning_segment)
-                return
-            self.turn = 2
-            visual.show_next_piece(y) # refresh next piece indicator
-            return
-        # player 2 (orange)
-        elif self.turn == 2:
-            button.array[x][y].player = 2
-            button.buttons[x][y]['bg'] = 'orange'
-            if (search.search_winner(button.array, self.turn) == True):
-                self.pause()
-                visual.blink_segment(search.winning_segment)
-                return
-            self.turn = 1
-            visual.show_next_piece(y) # refresh next piece indicator
-            return
+def show_indicator(col: int):
+    '''Shows the piece indicator image on top of the column.'''
+    if not game.is_paused:
+        if game.turn == 1:
+            top_sequence = display.red_indicator
+            bottom_image = display.red_indicator_bottom
 
-    def pause(self):
-        for row in range(button.height):
-            for col in range(button.width):
-                button.buttons[row][col]['command'] = '' # remove button function
-                
-    def reset(self):
-        if len(visual.stop_list) > 0:
-            for item in visual.stop_list:
-                window.after_cancel(item) # stops after() functions from blinking animation
-        for row in range(button.height):
-            for col in range(button.width):
-                button.array[row][col] = 0 # clear array
-                button.array[row][col] = Square(row, col) 
-                button.buttons[row][col]['bg'] = '#79abf2' # default tkinter color
-                button.buttons[row][col]['command'] = (lambda x=row, y=col: control.select(x,y)) # reassign function to button
-        self.turn = random.randint(1,2) # randomize first turn
+        elif game.turn == 2:
+            top_sequence = display.orange_indicator
+            bottom_image = display.orange_indicator_bottom
 
-class Visual:
-    def __init__(self):
-        # top row of squares displaying next piece
-        self.display = [row for row in range(button.width)]
-        for col in range(button.width):
-            self.display[col] = tk.Button(top_frame,
-                            font= ('', '20', 'bold'),
-                            text= (col+1),
-                            height= 1, width= 3,
-                            relief= tk.FLAT,
-                            fg= '#5b88c9',
-                            bg= '#79abf2',
-                            state= 'disabled')
-            self.display[col].grid(row=0, column=col,padx=(7,7), pady=(7,4))
-        self.stop_list = []
-
-    def show_next_piece(self, col):
-        if control.turn == 1:
-            self.display[col]['bg'] = 'red'
-            self.display[col]['text'] = ''
-            self.display[col]['relief'] = tk.RAISED
+        if game.collumn_is_full(col):
+            display.columns[col]['image'] = display.empty_space
         else:
-            self.display[col]['bg'] = 'orange'
-            self.display[col]['text'] = ''
-            self.display[col]['relief'] = tk.RAISED
-    
-    def hide_next_piece(self, col):
-        self.display[col]['bg'] = '#79abf2'
-        self.display[col]['text'] = (col+1)
-        self.display[col]['relief'] = tk.FLAT
+            display.start_animation(display.columns[col], top_sequence, loop=True)
+            display.slots[0][col]['image'] = bottom_image
 
-    def blink_segment(self, segment):
-        self.show_segment(segment)
 
-    def show_segment(self, segment):
-        for square in segment:
-            x = square[0]
-            y = square[1]
-            if control.turn == 1:
-                button.buttons[x][y]['bg'] = 'red'
-            else:
-                button.buttons[x][y]['bg'] = 'orange'
-        self.stop_list.append(window.after(400, lambda segment=segment: self.hide_segment(segment)))
+def hide_indicator(col: int):
+    '''Removes the piece indicator image from the column.'''
+    if not game.is_paused:
+        if not game.collumn_is_full(col):
+            display.slots[0][col]['image'] = display.empty_slot
+        display.stop_animation() 
+        display.columns[col]['image'] = display.empty_space
 
-    def hide_segment(self, segment):
-        for square in segment:
-            x = square[0]
-            y = square[1]
-            button.buttons[x][y]['bg'] = 'white'
-        self.stop_list.append(window.after(200, lambda segment=segment: self.show_segment(segment)))
 
-# root
-window = tk.Tk()
-window.resizable(0,0)
-window.title('Connect 4')
-window.configure(bg= '#588cd6')
+def reset_game(spacebar_pressed: bool):
+    '''Plays the reset animation then restarts the game.'''
+    if spacebar_pressed and game.can_reset:
+        game.can_reset = False
 
-# frame creation
-header_frame = tk.Frame(window, relief=tk.RIDGE, borderwidth=6)
-title_frame = tk.Frame(header_frame)
-top_frame = tk.Frame(window, relief=tk.SUNKEN, borderwidth=6, bg= '#79abf2')
-main_frame = tk.Frame(window)
-bottom_frame = tk.Frame(window)
-grid = tk.Frame(main_frame, bg= '#588cd6')
+        display.stop_animation()
+        display.reset_board(game.array)
+        display.hide_play_again()
+        display.after(1100, unpause)
 
-# frame packing
-header_frame.pack(fill=('x'))
-title_frame.pack()
-top_frame.pack(pady=(20,0))
-main_frame.pack(padx=(20,20),pady=(20,20))
-bottom_frame.pack(pady=(0,20))
-grid.pack()
+        display.reset()
+        game.reset()
 
-# class instances
-button = Button()
-control = Control()
-search = wincondition.Check(button.height, button.width)
-visual = Visual()
 
-# widget creation
-title_connect = tk.Label(title_frame, font=('Consolas', '60', 'bold'),
-                 text= 'Connect')
-title_4 = tk.Label(title_frame, font=('Consolas', '80', 'bold'),
-                 text= '4',
-                 fg= 'red')
+def winner_found(row:int, col:int, segment:list[list[int,int]]):
+    '''Stops the game and shows the winner.'''
+    hide_indicator(col)
+    display.show_play_again(game.color[game.turn])
+    display.show_winner(segment, game.turn)
+    display.after(1650, enable_reset)
+    game.is_paused = True
 
-reset_button = tk.Button(bottom_frame,
-                        font= ('Consolas', '15', 'bold'),
-                        text= 'RESET',
-                        relief= tk.RAISED,
-                        borderwidth= 3,
-                        bg= '#bfd1e0',
-                        command= control.reset)
 
-# widget packing
-title_connect.pack(side=tk.LEFT, anchor='e')
-title_4.pack(side=tk.RIGHT, anchor='w')
-reset_button.pack(side=tk.BOTTOM)
+def search_and_continue(row: int, col: int):
+    '''Searches for a winner and starts next turn if none is found.'''
+    if segment := game.search_winner():
+        winner_found(row, col, segment)
+        return
+    else:
+        game.next_turn()
+        hide_indicator(col)
+        show_indicator(col)
 
-window.mainloop()
+
+def enable_reset():
+    game.can_reset = True
+
+def unpause():
+    game.is_paused = False
+
+
+# binding user input
+display.bind_click_event(action)
+display.bind_hover_event(show=show_indicator, hide=hide_indicator)
+display.bind_spacebar_event(reset_game)
+
+
+
+
+
+if __name__ == '__main__':
+    display.mainloop()
+
+
+
+    ...
+
+
+
+

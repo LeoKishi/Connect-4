@@ -24,8 +24,10 @@ class Display(tk.Tk):
 
         self.load_images(theme)
         self.load_image_sequences(theme)
-        self.create_frames()
+        self.create_frames(theme)
         self.create_layout()
+
+        self.hide_play_again()
 
 
     def load_images(self, theme: str):
@@ -75,7 +77,7 @@ class Display(tk.Tk):
         self.orange_crown_shine = [tk.PhotoImage(file=f'assets/animated/orange_crown_shine{frame+1}.png') for frame in range(16)]
 
 
-    def create_frames(self):
+    def create_frames(self, theme: str):
         '''Creates frames and set image files.'''
         self.main_frame = tk.Frame(self)
         self.top_wall_frame = Wall(self.main_frame, self.top_wall)
@@ -85,16 +87,30 @@ class Display(tk.Tk):
         self.right_wall_frame = Wall(self.center_frame, self.right_wall).pack(side=tk.LEFT)
         self.bottom_wall_frame = Wall(self.main_frame, self.bottom_wall)
 
+        if theme == 'dark':
+            bg = '#201e23'
+            fg = 'white'
+        elif theme == 'light':
+            bg = 'white'
+            fg = '#201e23'
+
+        self.top_frame = TextLabel(self.main_frame, bg=bg, fg=fg)
         self.create_piece_view()
 
 
     def create_layout(self):
         '''Places the frames in the screen.'''
-        self.piece_view.pack(side=tk.TOP, fill='none', expand=False)
-        self.top_wall_frame.pack(side=tk.TOP)
-        self.center_frame.pack(side=tk.TOP)
-        self.bottom_wall_frame.pack(side=tk.TOP)
         self.main_frame.pack(fill='none', expand=True)
+
+        self.piece_view.pack(side=tk.TOP, fill='none', expand=False)
+        self.top_frame.pack(side=tk.TOP, fill='both', expand=True)
+        self.top_frame.pack_propagate(0)
+        
+        self.bottom_wall_frame.pack(side=tk.BOTTOM)
+        self.center_frame.pack(side=tk.BOTTOM)
+        self.top_wall_frame.pack(side=tk.BOTTOM)
+        
+        
 
 
     def bind_click_event(self, action):
@@ -118,7 +134,6 @@ class Display(tk.Tk):
     def bind_spacebar_event(self, reset):
         '''Binds a spacebar key press event.'''
         self.bind('<Key>', lambda event: reset(True if event.keysym == 'space' else False))
-
 
 
     def fill_slot(self, pos: tuple[int, int], turn: int):
@@ -210,23 +225,39 @@ class Display(tk.Tk):
 
 
     def show_winner(self, winner_segment:list[tuple[int, int]], turn: int):
-            if turn == 1:
-                image_sequence1 = self.red_smoke_reveal
-                image_sequence2 = self.red_crown_shine
+        '''Executes the animation for the winning segment.'''
+        if turn == 1:
+            image_sequence1 = self.red_smoke_reveal
+            image_sequence2 = self.red_crown_shine
 
-            elif turn == 2:
-                image_sequence1 = self.orange_smoke_reveal
-                image_sequence2 = self.orange_crown_shine
+        elif turn == 2:
+            image_sequence1 = self.orange_smoke_reveal
+            image_sequence2 = self.orange_crown_shine
 
-            for pos in winner_segment:
-                x, y = pos[0], pos[1]
-                self.start_animation(self.slots[x][y], image_sequence1, False, 12)
-                self.after(500, self.start_animation, self.slots[x][y], image_sequence2, True, 6)
+        for pos in winner_segment:
+            x, y = pos[0], pos[1]
+            self.start_animation(self.slots[x][y], image_sequence1, False, 12)
+            self.after(500, self.start_animation, self.slots[x][y], image_sequence2, True, 6)
 
 
     def store_id(self, identifier: str):
         '''Stores the after functions identifiers.'''
         self.stop_ids.append(identifier)
+
+
+    def show_play_again(self, player: str):
+        '''Show the play again text.'''
+        self.piece_view.pack_forget()
+        self.top_frame.winner['text'] = f'{player} wins!'
+        self.top_frame.pack(side=tk.TOP, fill='both', expand=True)
+        self.top_frame.pack_propagate(0)
+
+    
+    def hide_play_again(self):
+        '''Hides the play again text.'''
+        self.top_frame.pack_forget()
+        self.piece_view.pack(side=tk.TOP, fill='none', expand=False)
+
 
 
 
@@ -265,6 +296,28 @@ class PieceView(tk.Frame):
         for col in range(7):
             columns[col] = ImgLabel(self, image)
             columns[col].grid(row=0, column=col+1)
+
+
+class TextLabel(tk.Frame):
+    '''Creates a frame and places labels inside of it.'''
+    def __init__(self, parent, bg: str, fg: str):
+        super().__init__(parent, height=125, bg=bg)
+        self.winner = tk.Label(self,
+                               font=('Calibri', 15),
+                               bg=bg,
+                               fg=fg)
+        self.winner.pack(pady=(30,0))
+
+        self.play_again = tk.Label(self,
+                                   text='Press SPACE to play again',
+                                   font=('Calibri', 12),
+                                   bg=bg,
+                                   fg=fg)
+        self.play_again.pack(pady=(30,0))
+
+
+
+
 
 
 

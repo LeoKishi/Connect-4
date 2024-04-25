@@ -52,16 +52,12 @@ class Logic:
     def search_winner(self) -> list[tuple[int, int]] | bool:
         '''Searches every row and column for a winner.'''
         if segment := self.search.horizontal_search(self.array, self.turn):
-            print('horizontal')
             return segment
         elif segment := self.search.vertical_search(self.array, self.turn):
-            print('vertical')
             return segment
         elif segment := self.search.diagonal_search(self.array, self.turn):
-            print('diagonal')
             return segment
         elif segment := self.search.mirrored_diagonal_search(self.array, self.turn):
-            print('mirrored diagonal')
             return segment
         else:
             return False
