@@ -8,7 +8,6 @@ class Logic:
         self.move_count = 0
         self.is_paused = False
         self.can_reset = False
-        self.color = {1:'Red', 2:'Orange'}
         self.search = Search()
 
         # 2D list to hold information about each slot
@@ -35,7 +34,7 @@ class Logic:
                 return (row, y)
     
 
-    def collumn_is_full(self, col: int) -> bool:
+    def column_is_full(self, col: int) -> bool:
         '''Returns True if the specified column is full, returns False otherwise.'''
         for row in range(6):
             if self.array[row][col].player == 0:
@@ -56,19 +55,34 @@ class Logic:
         return True
         
 
-
     def search_winner(self) -> list[tuple[int, int]] | bool:
         '''Searches every row and column for a winner.'''
         if segment := self.search.horizontal_search(self.array, self.turn):
             return segment
+        
         elif segment := self.search.vertical_search(self.array, self.turn):
             return segment
+        
         elif segment := self.search.diagonal_search(self.array, self.turn):
             return segment
+        
         elif segment := self.search.mirrored_diagonal_search(self.array, self.turn):
             return segment
+        
         else:
             return False
+
+
+    def get_occupied_slots(self) -> list[tuple[int, int, int]]:
+        '''Returns a list of tuples containing the position of every occupied slot and the player occupying it.'''
+        occupied_slots = []
+
+        for row in range(6):
+            for col in range(7):
+                if self.array[row][col].player != 0:
+                    occupied_slots.append((row, col, self.array[row][col].player))
+
+        return occupied_slots
 
 
 class Slot:
@@ -177,6 +191,8 @@ class Search:
                 if counter >= 4:
                     return self.segment
         return False
+
+
 
 
 if __name__ == '__main__':

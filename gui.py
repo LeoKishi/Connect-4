@@ -1,8 +1,8 @@
 import tkinter as tk
-from tkinter import ttk
-from random import randint
 from random import choice
+from graphics import Graphics
 from playsound import playsound
+
 
 
 class Display(tk.Tk):
@@ -18,87 +18,41 @@ class Display(tk.Tk):
         self.minsize(875, 850)
         self.title('Connect 4')
 
+        if theme == 'dark':
+            self.configure(bg= '#201e23')
+        elif theme == 'light':
+            self.configure(bg= 'white')
+
         # 2D list with the image labels of each slot
         self.slots = [[col for col in range(7)] for row in range(6)]
 
-        # list to hold after functions identifiers
-        self.stop_ids = []
+        self.graphics = Graphics(self, theme)
 
-        self.load_images(theme)
-        self.load_image_sequences(theme)
         self.create_frames(theme)
         self.create_layout()
 
-        self.hide_play_again()
-
-
-    def load_images(self, theme: str):
-        '''Creates instances of image files.'''
-        if theme == 'dark':
-            folder = 'dark_theme'
-            self.configure(bg= '#201e23')
-
-        elif theme == 'light':
-            folder = 'light_theme'
-            self.configure(bg= 'white')
-
-        self.top_wall = tk.PhotoImage(file=f'assets/{folder}/top_wall.png')
-        self.left_wall = tk.PhotoImage(file=f'assets/{folder}/left_wall.png')
-        self.right_wall = tk.PhotoImage(file=f'assets/{folder}/right_wall.png')
-        self.bottom_wall = tk.PhotoImage(file=f'assets/{folder}/bottom_wall.png')
-
-        self.red_slot = tk.PhotoImage(file=f'assets/{folder}/red_slot.png')
-        self.empty_slot = tk.PhotoImage(file=f'assets/{folder}/empty_slot.png') 
-        self.orange_slot = tk.PhotoImage(file=f'assets/{folder}/orange_slot.png')
-
-        self.empty_space = tk.PhotoImage(file=f'assets/{folder}/empty_space.png')
-        self.empty_space_edge = tk.PhotoImage(file=f'assets/{folder}/empty_space_edge.png')
-
-        self.red_indicator_bottom = tk.PhotoImage(file=f'assets/{folder}/red_indicator_bottom.png')
-        self.orange_indicator_bottom = tk.PhotoImage(file=f'assets/{folder}/orange_indicator_bottom.png')
-
-
-    def load_image_sequences(self, theme: str):
-        '''Creates instances of image files in a list.'''
-        if theme == 'dark':
-            folder = 'dark_theme'
-
-        elif theme == 'light':
-            folder = 'light_theme'
-
-        self.orange_indicator = [tk.PhotoImage(file=f'assets/{folder}/animated/orange_indicator{frame+1}.png') for frame in range(10)]
-        self.red_indicator = [tk.PhotoImage(file=f'assets/{folder}/animated/red_indicator{frame+1}.png') for frame in range(10)]
-
-        self.orange_disc_flip = [tk.PhotoImage(file=f'assets/{folder}/animated/orange_disc_flip{frame+1}.png') for frame in range(14)]
-        self.red_disc_flip = [tk.PhotoImage(file=f'assets/{folder}/animated/red_disc_flip{frame+1}.png') for frame in range(14)]
-
-        self.red_smoke_reveal = [tk.PhotoImage(file=f'assets/animated/red_smoke_reveal{frame+1}.png') for frame in range(8)]
-        self.orange_smoke_reveal = [tk.PhotoImage(file=f'assets/animated/orange_smoke_reveal{frame+1}.png') for frame in range(8)]
-
-        self.red_crown_shine = [tk.PhotoImage(file=f'assets/animated/red_crown_shine{frame+1}.png') for frame in range(16)]
-        self.orange_crown_shine = [tk.PhotoImage(file=f'assets/animated/orange_crown_shine{frame+1}.png') for frame in range(16)]
-
-
+    # layout
     def create_frames(self, theme: str):
         '''Creates frames and set image files.'''
         self.main_frame = tk.Frame(self)
-        self.top_wall_frame = Wall(self.main_frame, self.top_wall)
+
+        self.top_wall_frame = Wall(self.main_frame, self.graphics.top_wall)
         self.center_frame = tk.Frame(self.main_frame)
-        self.left_wall_frame = Wall(self.center_frame, self.left_wall).pack(side=tk.LEFT)
-        self.grid = Grid(self.center_frame, self.empty_slot, self.slots).pack(side=tk.LEFT)
-        self.right_wall_frame = Wall(self.center_frame, self.right_wall).pack(side=tk.LEFT)
-        self.bottom_wall_frame = Wall(self.main_frame, self.bottom_wall)
+
+        self.left_wall_frame = Wall(self.center_frame, self.graphics.left_wall).pack(side=tk.LEFT)
+        self.grid = Grid(self.center_frame, self.graphics.empty_slot, self.slots).pack(side=tk.LEFT)
+        self.right_wall_frame = Wall(self.center_frame, self.graphics.right_wall).pack(side=tk.LEFT)
+
+        self.bottom_wall_frame = Wall(self.main_frame, self.graphics.bottom_wall)
 
         if theme == 'dark':
-            bg = '#201e23'
-            fg = 'white'
+            bg, fg = '#201e23', 'white'
+
         elif theme == 'light':
-            bg = 'white'
-            fg = '#201e23'
+            bg, fg = 'white', '#201e23'
 
         self.top_frame = TextLabel(self.main_frame, bg=bg, fg=fg)
         self.create_piece_view()
-
 
     def create_layout(self):
         '''Places the frames in the screen.'''
@@ -111,147 +65,18 @@ class Display(tk.Tk):
         self.bottom_wall_frame.pack(side=tk.BOTTOM)
         self.center_frame.pack(side=tk.BOTTOM)
         self.top_wall_frame.pack(side=tk.BOTTOM)
-        
 
-    def bind_click_event(self, action):
-        '''
-        Binds a mouse click event to each slot.\n
-        The event calls the specified function and passes in the coordinates of the clicked slot.
-        '''
-        for row in range(6):
-            for col in range(7):
-                self.slots[row][col].bind('<Button-1>', lambda event, x=row, y=col: action(x,y))
-
-
-    def bind_hover_event(self, show, hide):
-        '''Binds a hover event fo every slot.'''
-        for row in range(6):
-            for col in range(7):
-                self.slots[row][col].bind('<Enter>', lambda event, col=col: show(col))
-                self.slots[row][col].bind('<Leave>', lambda event, col=col: hide(col))
-
-
-    def bind_spacebar_event(self, reset):
-        '''Binds a spacebar key press event.'''
-        self.bind('<Key>', lambda event: reset(True if event.keysym == 'space' else False))
-
-
-    def fill_slot(self, pos: tuple[int, int], turn: int):
-        '''Places a piece of the specified color at the specified position.'''
-        x, y = pos[0], pos[1]
-
-        if turn == 1:
-            image = self.red_slot
-        elif turn == 2:
-            image = self.orange_slot
-
-        sounds = ['assets/click1.wav',
-                  'assets/click2.wav',
-                  'assets/click3.wav']
-
-        playsound(choice(sounds), block=False)
-        self.slots[x][y]['image'] = image
-
-
-    def reset(self):
-        for row in range(6):
-            for col in range(7):
-                self.slots[row][col]['image'] = self.empty_slot
-
+        self.hide_play_again()
 
     def create_piece_view(self):
         '''Creates the frame for the piece indicator.'''
         self.columns = [None for col in range(7)]
-        self.piece_view = PieceView(self.main_frame, self.empty_space, self.columns)
+        self.piece_view = PieceView(self.main_frame, self.graphics.empty_space, self.columns)
 
-        ImgLabel(self.piece_view, image=self.empty_space_edge).grid(row=0, column=0)
-        ImgLabel(self.piece_view, image=self.empty_space_edge).grid(row=0, column=8)
+        ImgLabel(self.piece_view, image=self.graphics.empty_space_edge).grid(row=0, column=0)
+        ImgLabel(self.piece_view, image=self.graphics.empty_space_edge).grid(row=0, column=8)
 
-
-    def start_animation(self, image_label, image_sequence:list, loop:bool = False, fps:int = 15, current_frame:int = 0) -> bool:
-        '''Changes the image on the image label at set interval.'''
-        image_label['image'] = image_sequence[current_frame]
-
-        total_frames = len(image_sequence)
-
-        if current_frame < total_frames-1:
-            current_frame += 1
-        elif loop:
-            current_frame = 0
-        else:
-            return True
-
-        stop_id = self.after(1000//fps, self.start_animation,
-                                  image_label,
-                                  image_sequence,
-                                  loop,
-                                  fps,
-                                  current_frame)
-
-        if loop:
-            self.store_id(stop_id)
-
-
-    def stop_animation(self):
-        for i in self.stop_ids:
-            self.after_cancel(i)
-
-
-    def reset_board(self, game_array: list[list[int]]):
-        '''Resets the slots one by one in a random order and plays an animation for each of them.'''
-        occupied_slots = self.get_occupied_slots(game_array)
-        self.reset_animation(occupied_slots)
-
-
-    def get_occupied_slots(self, game_array: list[list[int]]) -> list[tuple[int, int, int]]:
-        '''Returns a list of tuples containing the position of every occupied slot and the player occupying it.'''
-        occupied_slots = []
-
-        for row in range(6):
-            for col in range(7):
-                if game_array[row][col].player != 0:
-                    occupied_slots.append((row, col, game_array[row][col].player))
-
-        return occupied_slots
-
-
-    def reset_animation(self, occupied_slots:list[tuple[int, int]]):
-        '''Plays the reset animation for every occupied slot.'''
-        for pos in occupied_slots:
-            x, y = pos[0], pos[1]
-            player = pos[2]
-
-            if player == 1:
-                image_sequence = self.red_disc_flip
-            elif player == 2:
-                image_sequence = self.orange_disc_flip
-
-            self.start_animation(self.slots[x][y], image_sequence)
-
-
-    def show_winner(self, winner_segment:list[tuple[int, int]], turn: int):
-        '''Executes the animation for the winning segment.'''
-        if turn == 1:
-            image_sequence1 = self.red_smoke_reveal
-            image_sequence2 = self.red_crown_shine
-
-        elif turn == 2:
-            image_sequence1 = self.orange_smoke_reveal
-            image_sequence2 = self.orange_crown_shine
-
-        playsound('assets/crown.wav', block=False)
-
-        for pos in winner_segment:
-            x, y = pos[0], pos[1]
-            self.start_animation(self.slots[x][y], image_sequence1, False, 12)
-            self.after(500, self.start_animation, self.slots[x][y], image_sequence2, True, 6)
-
-
-    def store_id(self, identifier: str):
-        '''Stores the after functions identifiers.'''
-        self.stop_ids.append(identifier)
-
-
+    # gameover text
     def show_play_again(self, winner: str):
         '''Show the play again text.'''
         if winner == 0:
@@ -266,11 +91,114 @@ class Display(tk.Tk):
         self.top_frame.pack(side=tk.TOP, fill='both', expand=True)
         self.top_frame.pack_propagate(0)
 
-    
     def hide_play_again(self):
         '''Hides the play again text.'''
         self.top_frame.pack_forget()
         self.piece_view.pack(side=tk.TOP, fill='none', expand=False)
+
+    # player input binding
+    def bind_click_event(self, action):
+        '''
+        Binds a mouse click event to each slot.\n
+        The event calls the action function and passes in the coordinates of the clicked slot.
+        '''
+        for row in range(6):
+            for col in range(7):
+                self.slots[row][col].bind('<Button-1>', lambda event, x=row, y=col: action(x,y))
+
+    def bind_hover_event(self, show, hide):
+        '''
+        Binds a hover event fo every slot.\n
+        When the mouse hovers over the slot the show function is called.\n
+        When the mouse stops hovering over the slot the hide function is called.
+        '''
+        for row in range(6):
+            for col in range(7):
+                self.slots[row][col].bind('<Enter>', lambda event, col=col: show(col))
+                self.slots[row][col].bind('<Leave>', lambda event, col=col: hide(col))
+
+    def bind_spacebar_event(self, reset):
+        '''Binds a spacebar key press event.'''
+        self.bind('<Key>', lambda event: reset(True if event.keysym == 'space' else False))
+
+    # animations
+    def fall_animation(self, occupied_slots:list[tuple[int, int]]):
+        '''Plays the falling animation for every occupied slot.'''
+        for pos in occupied_slots:
+            x, y = pos[0], pos[1]
+            player = pos[2]
+
+            if player == 1:
+                image_sequence = self.graphics.rr_fall_start
+            elif player == 2:
+                image_sequence = self.graphics.oo_fall_start
+
+            self.graphics.start_animation(self.slots[x][y], image_sequence)
+
+    def winner_animation(self, winner_segment:list[tuple[int, int]], turn: int):
+        '''Executes the animation for the winning segment.'''
+        if turn == 1:
+            image_sequence1 = self.graphics.red_smoke_reveal
+            image_sequence2 = self.graphics.red_crown_shine
+
+        elif turn == 2:
+            image_sequence1 = self.graphics.orange_smoke_reveal
+            image_sequence2 = self.graphics.orange_crown_shine
+
+        playsound('assets/sound/crown.wav', block=False)
+
+        for pos in winner_segment:
+            x, y = pos[0], pos[1]
+            self.graphics.start_animation(self.slots[x][y], image_sequence1, False, 12)
+            self.after(550, self.graphics.start_animation, self.slots[x][y], image_sequence2, True, 6)
+
+    def draw_indicator(self, col: int, turn: int, column_is_full: bool):
+        '''Starts the indicator animation.'''
+        if turn == 1:
+            top_sequence = self.graphics.red_indicator
+            bottom_image = self.graphics.red_indicator_bottom
+
+        elif turn == 2:
+            top_sequence = self.graphics.orange_indicator
+            bottom_image = self.graphics.orange_indicator_bottom
+
+        if column_is_full:
+            self.columns[col]['image'] = self.graphics.empty_space
+        else:
+            self.graphics.start_animation(self.columns[col], top_sequence, loop=True)
+            self.slots[0][col]['image'] = bottom_image
+
+    def erase_indicator(self, col: int, column_is_full: bool):
+        '''Changes the indicator into an empty image.'''
+        if not column_is_full:
+            self.slots[0][col]['image'] = self.graphics.empty_slot
+        self.graphics.stop_animation() 
+        self.columns[col]['image'] = self.graphics.empty_space
+
+    # player interaction
+    def fill_slot(self, pos: tuple[int, int], turn: int):
+        '''Places a piece of the specified color at the specified position.'''
+        x, y = pos[0], pos[1]
+
+        if turn == 1:
+            image = self.graphics.red_slot
+        elif turn == 2:
+            image = self.graphics.orange_slot
+
+        sounds = ['assets/sound/click1.wav',
+                  'assets/sound/click2.wav',
+                  'assets/sound/click3.wav']
+
+        playsound(choice(sounds), block=False)
+        self.slots[x][y]['image'] = image
+
+    def reset(self):
+        '''Resets the slots image.'''
+        for row in range(6):
+            for col in range(7):
+                self.slots[row][col]['image'] = self.graphics.empty_slot
+
+
 
 
 class ImgLabel(tk.Label):
@@ -287,6 +215,7 @@ class Grid(tk.Frame):
     '''Creates a frame and places a grid of image labels inside of it.'''
     def __init__(self, parent, image, slots: list[list[int]]):
         super().__init__(parent)
+
         for row in range(6):
             for col in range(7):
                 slots[row][col] = ImgLabel(self, image)
@@ -297,6 +226,7 @@ class Wall(tk.Frame):
     '''Creates a frame and places an image inside of it.'''
     def __init__(self, parent, image):
         super().__init__(parent)
+
         ImgLabel(self, image).pack()
 
 
@@ -304,6 +234,7 @@ class PieceView(tk.Frame):
     '''Creates a frame and places a grid of image labels inside of it.'''
     def __init__(self, parent, image, columns: list[list[int]]):
         super().__init__(parent)
+
         for col in range(7):
             columns[col] = ImgLabel(self, image)
             columns[col].grid(row=0, column=col+1)
@@ -313,19 +244,14 @@ class TextLabel(tk.Frame):
     '''Creates a frame and places labels inside of it.'''
     def __init__(self, parent, bg: str, fg: str):
         super().__init__(parent, height=125, bg=bg)
-        self.winner = tk.Label(self,
-                               font=('Calibri', 15),
-                               bg=bg, fg=fg)
+
+        self.winner = tk.Label(self, font=('Calibri', 15), bg=bg, fg=fg)
+
+        self.play_again = tk.Label(self, text='Press SPACE to play again',
+                                   font=('Calibri', 12), bg=bg, fg=fg)
+        
         self.winner.pack(pady=(30,0))
-
-        self.play_again = tk.Label(self,
-                                   text='Press SPACE to play again',
-                                   font=('Calibri', 12),
-                                   bg=bg, fg=fg)
         self.play_again.pack(pady=(30,0))
-
-
-
 
 
 

@@ -9,7 +9,7 @@ game = Logic()
 def action(row: int, col: int):
     '''Places a piece in the selected column.'''
     if not game.is_paused:
-        if not game.collumn_is_full(col):
+        if not game.column_is_full(col):
             pos = game.find_bottom((row, col))
             display.fill_slot(pos, game.turn)
             game.update_slot(pos)
@@ -17,30 +17,15 @@ def action(row: int, col: int):
 
 
 def show_indicator(col: int):
-    '''Shows the piece indicator image on top of the column.'''
+    '''Shows the piece indicator on top of the column.'''
     if not game.is_paused:
-        if game.turn == 1:
-            top_sequence = display.red_indicator
-            bottom_image = display.red_indicator_bottom
-
-        elif game.turn == 2:
-            top_sequence = display.orange_indicator
-            bottom_image = display.orange_indicator_bottom
-
-        if game.collumn_is_full(col):
-            display.columns[col]['image'] = display.empty_space
-        else:
-            display.start_animation(display.columns[col], top_sequence, loop=True)
-            display.slots[0][col]['image'] = bottom_image
+        display.draw_indicator(col, game.turn, game.column_is_full(col))
 
 
 def hide_indicator(col: int):
-    '''Removes the piece indicator image from the column.'''
+    '''Removes the piece indicator from the column.'''
     if not game.is_paused:
-        if not game.collumn_is_full(col):
-            display.slots[0][col]['image'] = display.empty_slot
-        display.stop_animation() 
-        display.columns[col]['image'] = display.empty_space
+        display.erase_indicator(col, game.column_is_full(col))
 
 
 def reset_game(spacebar_pressed: bool):
@@ -48,20 +33,21 @@ def reset_game(spacebar_pressed: bool):
     if spacebar_pressed and game.can_reset:
         game.can_reset = False
 
-        display.stop_animation()
-        display.reset_board(game.array)
         display.hide_play_again()
+        display.graphics.stop_animation()
+        display.fall_animation(game.get_occupied_slots())
+
         display.after(600, restart)
 
 
 def winner_found(row:int, col:int, segment:list[list[int,int]]):
     '''Stops the game and shows the winner.'''
     hide_indicator(col)
-    display.show_play_again(game.turn)
-    display.show_winner(segment, game.turn)
-    display.after(1650, enable_reset)
     game.is_paused = True
 
+    display.winner_animation(segment, game.turn)
+    display.after(1650, enable_reset)
+    
 
 def search_and_continue(row: int, col: int):
     '''Searches for a winner and starts next turn if none is found.'''
@@ -69,25 +55,26 @@ def search_and_continue(row: int, col: int):
         winner_found(row, col, segment)
         return
     else:
+        hide_indicator(col)
+
         if game.next_turn():
-            hide_indicator(col)
             show_indicator(col)
         else:
-            hide_indicator(col)
             display.show_play_again(0)
             enable_reset()
             game.is_paused = True
 
 
 def enable_reset():
+    display.show_play_again(game.turn)
     game.can_reset = True
+
 
 def restart():
     display.reset()
     game.reset()
     game.is_paused = False
     
-
 
 # binding user input
 display.bind_click_event(action)
