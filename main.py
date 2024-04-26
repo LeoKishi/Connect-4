@@ -51,10 +51,7 @@ def reset_game(spacebar_pressed: bool):
         display.stop_animation()
         display.reset_board(game.array)
         display.hide_play_again()
-        display.after(1100, unpause)
-
-        display.reset()
-        game.reset()
+        display.after(600, restart)
 
 
 def winner_found(row:int, col:int, segment:list[list[int,int]]):
@@ -85,15 +82,17 @@ def search_and_continue(row: int, col: int):
 def enable_reset():
     game.can_reset = True
 
-def unpause():
+def restart():
+    display.reset()
+    game.reset()
     game.is_paused = False
+    
 
 
 # binding user input
 display.bind_click_event(action)
 display.bind_hover_event(show=show_indicator, hide=hide_indicator)
 display.bind_spacebar_event(reset_game)
-
 
 
 
