@@ -54,6 +54,7 @@ class Display(tk.Tk):
         self.top_frame = TextLabel(self.main_frame, bg=bg, fg=fg)
         self.create_piece_view()
 
+
     def create_layout(self):
         '''Places the frames in the screen.'''
         self.main_frame.pack(fill='none', expand=True)
@@ -67,6 +68,7 @@ class Display(tk.Tk):
         self.top_wall_frame.pack(side=tk.BOTTOM)
 
         self.hide_play_again()
+
 
     def create_piece_view(self):
         '''Creates the frame for the piece indicator.'''
@@ -91,6 +93,7 @@ class Display(tk.Tk):
         self.top_frame.pack(side=tk.TOP, fill='both', expand=True)
         self.top_frame.pack_propagate(0)
 
+
     def hide_play_again(self):
         '''Hides the play again text.'''
         self.top_frame.pack_forget()
@@ -106,6 +109,7 @@ class Display(tk.Tk):
             for col in range(7):
                 self.slots[row][col].bind('<Button-1>', lambda event, x=row, y=col: action(x,y))
 
+
     def bind_hover_event(self, show, hide):
         '''
         Binds a hover event fo every slot.\n
@@ -117,23 +121,44 @@ class Display(tk.Tk):
                 self.slots[row][col].bind('<Enter>', lambda event, col=col: show(col))
                 self.slots[row][col].bind('<Leave>', lambda event, col=col: hide(col))
 
+
     def bind_spacebar_event(self, reset):
         '''Binds a spacebar key press event.'''
         self.bind('<Key>', lambda event: reset(True if event.keysym == 'space' else False))
 
     # animations
-    def fall_animation(self, occupied_slots:list[tuple[int, int]]):
+    def fall_animation(self, board_state:list[list[str]], func, start:bool = False, _count:int = 0):
         '''Plays the falling animation for every occupied slot.'''
-        for pos in occupied_slots:
-            x, y = pos[0], pos[1]
-            player = pos[2]
+        if _count == 6:
+            self.graphics.stop_animation()
+            self.reset()
+            return
+        else:
+            _count += 1
 
-            if player == 1:
-                image_sequence = self.graphics.rr_fall_start
-            elif player == 2:
-                image_sequence = self.graphics.oo_fall_start
+        for row in range(6):
+            for col in range(7):
+                if board_state[row][col] != '':
+                    if start:
+                        image_sequence = self.graphics.fall_start[board_state[row][col]]
+                    else:
+                        image_sequence = self.graphics.fall[board_state[row][col]]
 
-            self.graphics.start_animation(self.slots[x][y], image_sequence)
+                    self.graphics.start_animation(self.slots[row][col], image_sequence, fps=20)
+
+                else:
+                    self.slots[row][col]['image'] = self.graphics.empty_slot
+
+        if start:
+            time = 300
+        else:
+            time = 200
+        
+        self.after(time, self.fall_animation, func(), func, False, _count)
+                
+
+                
+
 
     def winner_animation(self, winner_segment:list[tuple[int, int]], turn: int):
         '''Executes the animation for the winning segment.'''
@@ -152,6 +177,7 @@ class Display(tk.Tk):
             self.graphics.start_animation(self.slots[x][y], image_sequence1, False, 12)
             self.after(550, self.graphics.start_animation, self.slots[x][y], image_sequence2, True, 6)
 
+
     def draw_indicator(self, col: int, turn: int, column_is_full: bool):
         '''Starts the indicator animation.'''
         if turn == 1:
@@ -167,6 +193,7 @@ class Display(tk.Tk):
         else:
             self.graphics.start_animation(self.columns[col], top_sequence, loop=True)
             self.slots[0][col]['image'] = bottom_image
+
 
     def erase_indicator(self, col: int, column_is_full: bool):
         '''Changes the indicator into an empty image.'''
@@ -191,6 +218,7 @@ class Display(tk.Tk):
 
         playsound(choice(sounds), block=False)
         self.slots[x][y]['image'] = image
+
 
     def reset(self):
         '''Resets the slots image.'''

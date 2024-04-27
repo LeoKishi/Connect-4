@@ -13,6 +13,9 @@ class Logic:
         # 2D list to hold information about each slot
         self.array = [[Slot(row, col) for col in range(7)] for row in range(6)]
 
+        # 2D list to store the final state of the board
+        self.board_state = [['' for col in range(7)] for row in range(6)]
+
 
     def reset(self):
         self.turn = randint(1,2)
@@ -83,6 +86,58 @@ class Logic:
                     occupied_slots.append((row, col, self.array[row][col].player))
 
         return occupied_slots
+
+
+    def find_sequence(self, col:int):
+        '''Returns the order of the pieces in the given column.'''
+        column = [self.array[row][col].player for row in range(6)][::-1]
+        sequence = ['']*6
+
+        letter = {1:'r', 2:'o', 0:''}
+
+        for i in range(1, len(column)):
+            if i == 5:
+                sequence[i] = letter[column[i]]
+            sequence[i-1] = (letter[column[i-1]] + letter[column[i]])
+
+        return sequence
+
+
+    def get_board_state(self):
+        '''Returns the order of the pieces in the board.'''
+        columns = []
+
+        for col in range(7):
+            columns.append(self.find_sequence(col))
+
+        for col in range(7):
+            for row in range(6):
+                self.board_state[row][col] = columns[col][row]
+
+        self.board_state = self.board_state[::-1]
+
+        return self.board_state
+
+
+    def drop_pieces(self):
+        '''Drops the piece by one slot.'''
+        self.board_state.pop()
+        self.board_state.insert(0, ['' for col in range(7)])
+
+        return self.board_state
+
+
+    def print_board(self):
+        for row in self.board_state:
+            print(row)
+
+
+
+
+class Sequence:
+    sequence = []
+
+
 
 
 class Slot:

@@ -57,8 +57,8 @@ class Graphics:
                                 fps,
                                 current_frame)
 
-        if loop:
-            self.stop_ids.append(stop_id)
+
+        self.stop_ids.append(stop_id)
 
 
     def stop_animation(self):
@@ -105,7 +105,6 @@ class Graphics:
         self.orange_indicator = [Frame('orange_indicator', frame, self.theme) for frame in range(10)]
         self.red_indicator = [Frame('red_indicator', frame, self.theme) for frame in range(10)]
 
-
         # starting fall animation (top)
         self.o_fall_top_start = [Frame('o_fall_top_s', frame, self.theme) for frame in range(7)]
         self.r_fall_top_start = [Frame('r_fall_top_s', frame, self.theme) for frame in range(7)]
@@ -117,7 +116,6 @@ class Graphics:
         self.ro_fall_start = [Frame('ro_fall_s', frame, self.theme) for frame in range(6)]
         self.rr_fall_start = [Frame('rr_fall_s', frame, self.theme) for frame in range(6)] 
 
-
         # fall animation (top)
         self.o_fall_top = [Frame('o_fall_top', frame, self.theme) for frame in range(4)]
         self.r_fall_top = [Frame('r_fall_top', frame, self.theme) for frame in range(4)]
@@ -128,6 +126,22 @@ class Graphics:
 
         self.ro_fall = [Frame('ro_fall', frame, self.theme) for frame in range(4)]
         self.rr_fall = [Frame('rr_fall', frame, self.theme) for frame in range(4)] 
+
+        self.fall_start = {'r':self.r_fall_top_start,
+                            'o':self.o_fall_top_start,
+                            'rr':self.rr_fall_start,
+                            'ro':self.ro_fall_start,
+                            'oo':self.oo_fall_start,
+                            'or':self.or_fall_start}
+
+        self.fall = {'r':self.r_fall_top,
+                    'o':self.o_fall_top,
+                    'rr':self.rr_fall,
+                    'ro':self.ro_fall,
+                    'oo':self.oo_fall,
+                    'or':self.or_fall}
+
+
 
 
 class Image(tk.PhotoImage):

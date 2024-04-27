@@ -35,9 +35,11 @@ def reset_game(spacebar_pressed: bool):
 
         display.hide_play_again()
         display.graphics.stop_animation()
-        display.fall_animation(game.get_occupied_slots())
 
-        display.after(600, restart)
+        
+        display.fall_animation(game.get_board_state(), game.drop_pieces, start=True)
+
+        display.after(1100, restart)
 
 
 def winner_found(row:int, col:int, segment:list[list[int,int]]):
@@ -46,7 +48,7 @@ def winner_found(row:int, col:int, segment:list[list[int,int]]):
     game.is_paused = True
 
     display.winner_animation(segment, game.turn)
-    display.after(1650, enable_reset)
+    display.after(800, enable_reset)
     
 
 def search_and_continue(row: int, col: int):
@@ -60,13 +62,15 @@ def search_and_continue(row: int, col: int):
         if game.next_turn():
             show_indicator(col)
         else:
-            display.show_play_again(0)
-            enable_reset()
+            enable_reset(tie=True)
             game.is_paused = True
 
 
-def enable_reset():
-    display.show_play_again(game.turn)
+def enable_reset(tie:bool = False):
+    if tie:
+        display.show_play_again(0)
+    else:
+        display.show_play_again(game.turn)
     game.can_reset = True
 
 
