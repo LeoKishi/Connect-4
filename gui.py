@@ -2,7 +2,7 @@ import tkinter as tk
 from random import choice
 from graphics import Graphics
 from playsound import playsound
-
+from animation import Animation
 
 
 class Display(tk.Tk):
