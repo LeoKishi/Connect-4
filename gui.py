@@ -2,7 +2,7 @@ import tkinter as tk
 from random import choice
 from graphics import Graphics
 from playsound import playsound
-from animation import Animation
+from animation import Sprite
 
 
 class Display(tk.Tk):
@@ -10,7 +10,8 @@ class Display(tk.Tk):
     Initializes the game window.\n
     Arguments:
         mode
-            'dark' for dark mode. Light mode by default
+            'dark' for dark mode, 'light' for light mode\n
+            Light mode by default
     '''
     def __init__(self, theme: str = 'light'):
         super().__init__()
@@ -40,7 +41,7 @@ class Display(tk.Tk):
         self.center_frame = tk.Frame(self.main_frame)
 
         self.left_wall_frame = Wall(self.center_frame, self.graphics.left_wall).pack(side=tk.LEFT)
-        self.grid = Grid(self.center_frame, self.graphics.empty_slot, self.slots).pack(side=tk.LEFT)
+        self.grid = Grid(self, self.center_frame, self.graphics.empty_slot, self.slots).pack(side=tk.LEFT)
         self.right_wall_frame = Wall(self.center_frame, self.graphics.right_wall).pack(side=tk.LEFT)
 
         self.bottom_wall_frame = Wall(self.main_frame, self.graphics.bottom_wall)
@@ -163,19 +164,20 @@ class Display(tk.Tk):
     def winner_animation(self, winner_segment:list[tuple[int, int]], turn: int):
         '''Executes the animation for the winning segment.'''
         if turn == 1:
-            image_sequence1 = self.graphics.red_smoke_reveal
-            image_sequence2 = self.graphics.red_crown_shine
+            smoke = self.graphics.red_smoke
+            crown = self.graphics.red_crown
 
         elif turn == 2:
-            image_sequence1 = self.graphics.orange_smoke_reveal
-            image_sequence2 = self.graphics.orange_crown_shine
+            smoke = self.graphics.orange_smoke
+            crown = self.graphics.orange_crown
 
         playsound('assets/sound/crown.wav', block=False)
 
         for pos in winner_segment:
             x, y = pos[0], pos[1]
-            self.graphics.start_animation(self.slots[x][y], image_sequence1, False, 12)
-            self.after(550, self.graphics.start_animation, self.slots[x][y], image_sequence2, True, 6)
+
+            self.slots[x][y].play(smoke, loop=False, fps=12)
+            self.slots[x][y].chain(crown, loop=True, fps=6)
 
 
     def draw_indicator(self, col: int, turn: int, column_is_full: bool):
@@ -241,12 +243,12 @@ class ImgLabel(tk.Label):
 
 class Grid(tk.Frame):
     '''Creates a frame and places a grid of image labels inside of it.'''
-    def __init__(self, parent, image, slots: list[list[int]]):
+    def __init__(self, display, parent, image, slots: list[list[int]]):
         super().__init__(parent)
 
         for row in range(6):
             for col in range(7):
-                slots[row][col] = ImgLabel(self, image)
+                slots[row][col] = Sprite(display, self, image)
                 slots[row][col].grid(row=row, column=col)
 
 

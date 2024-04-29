@@ -1,4 +1,5 @@
 import tkinter as tk
+from glob import glob
 
 
 class Graphics:
@@ -94,38 +95,38 @@ class Graphics:
         '''Creates instances of image files in a list.'''
 
         # smoke reveal animation
-        self.red_smoke_reveal = [Frame('red_smoke_reveal', frame) for frame in range(8)]
-        self.orange_smoke_reveal = [Frame('orange_smoke_reveal', frame) for frame in range(8)]
+        self.red_smoke = self.load_frames(f'assets/sprites/default/smoke/red_smoke')
+        self.orange_smoke = self.load_frames(f'assets/sprites/default/smoke/orange_smoke')
 
         # crown glimmer animation
-        self.red_crown_shine = [Frame('red_crown_shine', frame) for frame in range(16)]
-        self.orange_crown_shine = [Frame('orange_crown_shine', frame) for frame in range(16)]
+        self.red_crown = self.load_frames(f'assets/sprites/default/crown/red_crown')
+        self.orange_crown = self.load_frames(f'assets/sprites/default/crown/orange_crown')
 
         # indicator animation
-        self.orange_indicator = [Frame('orange_indicator', frame, self.theme) for frame in range(10)]
-        self.red_indicator = [Frame('red_indicator', frame, self.theme) for frame in range(10)]
+        self.orange_indicator = self.load_frames(f'assets/sprites/{self.theme}/animated/orange_indicator')
+        self.red_indicator = self.load_frames(f'assets/sprites/{self.theme}/animated/red_indicator')
 
         # starting fall animation (top)
-        self.o_fall_top_start = [Frame('o_fall_top_s', frame, self.theme) for frame in range(7)]
-        self.r_fall_top_start = [Frame('r_fall_top_s', frame, self.theme) for frame in range(7)]
+        self.o_fall_top_start = self.load_frames(f'assets/sprites/{self.theme}/animated/o_fall_top_s')
+        self.r_fall_top_start = self.load_frames(f'assets/sprites/{self.theme}/animated/r_fall_top_s')
 
         # starting fall animation
-        self.oo_fall_start = [Frame('oo_fall_s', frame, self.theme) for frame in range(6)]
-        self.or_fall_start = [Frame('or_fall_s', frame, self.theme) for frame in range(6)]
+        self.oo_fall_start = self.load_frames(f'assets/sprites/{self.theme}/animated/oo_fall_s')
+        self.or_fall_start = self.load_frames(f'assets/sprites/{self.theme}/animated/or_fall_s')
 
-        self.ro_fall_start = [Frame('ro_fall_s', frame, self.theme) for frame in range(6)]
-        self.rr_fall_start = [Frame('rr_fall_s', frame, self.theme) for frame in range(6)] 
+        self.ro_fall_start = self.load_frames(f'assets/sprites/{self.theme}/animated/ro_fall_s')
+        self.rr_fall_start = self.load_frames(f'assets/sprites/{self.theme}/animated/rr_fall_s')
 
         # fall animation (top)
-        self.o_fall_top = [Frame('o_fall_top', frame, self.theme) for frame in range(4)]
-        self.r_fall_top = [Frame('r_fall_top', frame, self.theme) for frame in range(4)]
+        self.o_fall_top = self.load_frames(f'assets/sprites/{self.theme}/animated/o_fall_top')
+        self.r_fall_top = self.load_frames(f'assets/sprites/{self.theme}/animated/r_fall_top')
 
         # fall animation
-        self.oo_fall = [Frame('oo_fall', frame, self.theme) for frame in range(4)]
-        self.or_fall = [Frame('or_fall', frame, self.theme) for frame in range(4)]
+        self.oo_fall = self.load_frames(f'assets/sprites/{self.theme}/animated/oo_fall')
+        self.or_fall = self.load_frames(f'assets/sprites/{self.theme}/animated/or_fall')
 
-        self.ro_fall = [Frame('ro_fall', frame, self.theme) for frame in range(4)]
-        self.rr_fall = [Frame('rr_fall', frame, self.theme) for frame in range(4)] 
+        self.ro_fall = self.load_frames(f'assets/sprites/{self.theme}/animated/ro_fall')
+        self.rr_fall = self.load_frames(f'assets/sprites/{self.theme}/animated/rr_fall')
 
         self.fall_start = {'r':self.r_fall_top_start,
                             'o':self.o_fall_top_start,
@@ -142,6 +143,29 @@ class Graphics:
                     'or':self.or_fall}
 
 
+    def load_frames(self, directory: str) -> list[tk.PhotoImage]:
+        '''Create a list with every frame of the animation.'''
+        frames = list()
+
+        for file in self._get_files(directory):
+            frames.append(tk.PhotoImage(file=f'{directory}/{file}.png'))
+
+        return frames
+
+
+    def _get_files(self, directory: str) -> list[str]:
+        '''Returns a sorted list with the name of every file in the directory.'''
+        file_names = list()
+
+        # list all png files in directory
+        for name in glob(f'{directory}/*.png'):
+            file_names.append(name[len(directory)+1:-4])
+        
+        # sort files by frame number
+        name_len = len(file_names[0][:-1])
+        file_names.sort(key=lambda frame: int(frame[name_len:]))
+
+        return file_names
 
 
 class Image(tk.PhotoImage):
