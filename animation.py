@@ -34,6 +34,16 @@ class Sprite(tk.Label):
             self.next()
 
 
+    def next(self):
+        '''Jumps to the next item in the queue.'''
+        self.stop()
+
+        if not self.queue:
+            return
+
+        self._handle_queue()
+
+
     def stop(self):
         '''Stops the animation'''
         if self.stop_id:
@@ -55,17 +65,14 @@ class Sprite(tk.Label):
         self.queue.append((func, timer))
 
 
-    def next(self):
-        '''Jumps to the next item in the queue.'''
+    def set_image(self, image:tk.PhotoImage):
+        '''Stops any ongoing animation and sets a still image.'''
         self.stop()
-
-        if not self.queue:
-            return
-
-        self._handle_queue()
+        self['image'] = image
 
 
     def clear_queue(self):
+        '''Removes all queued items.'''
         self.queue = list()
 
 
@@ -74,44 +81,23 @@ class Sprite(tk.Label):
         item = self.queue[0][0]
         info = self.queue.pop(0)
 
+        # sequence
         if isinstance(item, list):
-            self._next_sequence(*info)
+            self.play(*info[:-1])
 
+        # image
         elif isinstance(item, tk.PhotoImage):
-            self._next_image(*info)
+            image = info[0]
+            self['image'] = image
 
+        # function
         elif isinstance(item, Callable):
-            self._next_func(*info)
+            func = info[0]
+            func()
 
-
-    def _next_sequence(self, sequence:list[tk.PhotoImage], loop:bool, fps:int, timer:int):
-        '''Plays the next animation in the queue.'''
-        self.play(sequence, loop, fps)
-
+        timer = info[-1]
         if timer is not None:
             self.root.after(timer, self.next)
-
-
-    def _next_image(self, image:tk.PhotoImage, timer:int):
-        '''Plays the next image in the queue.'''
-        self['image'] = image
-
-        if timer is not None:
-            self.root.after(timer, self.next)
-
-
-    def _next_func(self, func:Callable, timer:int):
-        '''Plays the next function in the queue.'''
-        func()
-
-        if timer is not None:
-            self.root.after(timer, self.next)
-
-
-    def set_image(self, image:tk.PhotoImage):
-        '''Stops any ongoing animation and sets a still image.'''
-        self.stop()
-        self['image'] = image
 
 
     def _start_animation(self, sequence:list[tk.PhotoImage], loop:bool, fps:int, _frame:int = 0):

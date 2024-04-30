@@ -8,23 +8,32 @@ game = Logic()
 
 def action(row: int, col: int):
     '''Places a piece in the selected column.'''
-    if not game.is_paused:
+    def timed_call():
+        if not search_and_continue(row,col):
+            display.draw_indicator(game.turn, game.column_is_full)
+        game.can_click = True
+
+    if not game.is_paused and game.can_click:
         if not game.column_is_full(col):
             pos = game.find_bottom((row, col))
-            display.fill_slot(pos, game.turn, (lambda row=row, col=col: search_and_continue(row,col)))
+
+            game.can_click = False
+            display.fill_slot(pos, game.turn, timed_call)
+            
             game.update_slot(pos)
             
 
 def show_indicator(col: int):
     '''Shows the piece indicator on top of the column.'''
     if not game.is_paused:
-        display.draw_indicator(col, game.turn, game.column_is_full(col))
+        display.mouse_pos = col
+        display.draw_indicator(game.turn, game.column_is_full)
 
 
 def hide_indicator(col: int):
     '''Removes the piece indicator from the column.'''
     if not game.is_paused:
-        display.erase_indicator(col, game.column_is_full(col))
+        display.erase_indicator(game.column_is_full)
 
 
 def reset_game(spacebar_pressed: bool):
@@ -33,23 +42,21 @@ def reset_game(spacebar_pressed: bool):
         game.can_reset = False
 
         display.hide_play_again()
-        
         display.fall_animation(game.get_board_state(), game.next_board_state)
 
         height = game.get_tallest_collumn()
         delay = 1100
 
         if height == 5:
-            delay += 300
+            delay += 200
         elif height == 6:
-            delay += 600
+            delay += 400
 
         display.after(delay, restart)
 
 
 def winner_found(row:int, col:int, segment:list[list[int,int]]):
     '''Stops the game and shows the winner.'''
-    hide_indicator(col)
     game.is_paused = True
 
     display.winner_animation(segment, game.turn)
@@ -58,17 +65,16 @@ def winner_found(row:int, col:int, segment:list[list[int,int]]):
 
 def search_and_continue(row: int, col: int):
     '''Searches for a winner and starts next turn if none is found.'''
+    
     if segment := game.search_winner():
-        winner_found(row, col, segment)
-        return
-    else:
         hide_indicator(col)
-
-        if game.next_turn():
-            show_indicator(col)
-        else:
+        winner_found(row, col, segment)
+        return True
+    else:
+        if not game.next_turn():
             enable_reset(tie=True)
             game.is_paused = True
+        return False
 
 
 def enable_reset(tie:bool = False):
@@ -83,6 +89,7 @@ def restart():
     display.reset()
     game.reset()
     game.is_paused = False
+    game.can_click = True
     
 
 # binding user input

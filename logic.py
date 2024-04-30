@@ -8,6 +8,7 @@ class Logic:
         self.move_count = 0
         self.is_paused = False
         self.can_reset = False
+        self.can_click = True
         self.search = Search()
 
         # 2D list to hold information about each slot

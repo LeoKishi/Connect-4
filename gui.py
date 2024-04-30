@@ -28,6 +28,8 @@ class Display(tk.Tk):
         # 2D list with the image labels of each slot
         self.slots = [[col for col in range(7)] for row in range(6)]
 
+        self.mouse_pos = None
+
         self.graphics = Graphics(self, theme)
 
         self._create_frames(theme)
@@ -167,8 +169,10 @@ class Display(tk.Tk):
             self.slots[x][y].chain(crown, loop=True, fps=6)
 
 
-    def draw_indicator(self, col: int, turn: int, column_is_full: bool):
+    def draw_indicator(self, turn: int, column_is_full: Callable):
         '''Starts the indicator animation.'''
+        self.erase_indicator(column_is_full)
+
         if turn == 1:
             indicator = self.graphics.red_indicator
             indicator_bottom = self.graphics.red_indicator_bottom
@@ -177,18 +181,19 @@ class Display(tk.Tk):
             indicator = self.graphics.orange_indicator
             indicator_bottom = self.graphics.orange_indicator_bottom
 
-        if column_is_full:
-            self.columns[col].set_image(self.graphics.empty_space)
+        if column_is_full(self.mouse_pos):
+            self.columns[self.mouse_pos].set_image(self.graphics.empty_space)
         else:
-            self.columns[col].play(indicator, loop=True)
-            self.slots[0][col].set_image(indicator_bottom)
+            self.columns[self.mouse_pos].play(indicator, loop=True)
+            self.slots[0][self.mouse_pos].set_image(indicator_bottom)
 
 
-    def erase_indicator(self, col: int, column_is_full: bool):
+    def erase_indicator(self, column_is_full: Callable):
         '''Changes the indicator into an empty image.'''
-        if not column_is_full:
-            self.slots[0][col].set_image(self.graphics.empty_slot)
-        self.columns[col].set_image(self.graphics.empty_space)
+        for _ in range(7):
+            if not column_is_full(_):
+                self.slots[0][_].set_image(self.graphics.empty_slot)
+            self.columns[_].set_image(self.graphics.empty_space)
 
 
     def drop_animation(self, pos:tuple[int, int], sequence:list[tk.PhotoImage], sequence_bot:list[tk.PhotoImage], image:tk.PhotoImage, func):
@@ -217,9 +222,8 @@ class Display(tk.Tk):
         for row in range(pos[0]+1):
             self.slots[row][y].play()
 
-
     # player interaction
-    def fill_slot(self, pos: tuple[int, int], turn: int, func):
+    def fill_slot(self, pos: tuple[int, int], turn: int, func:Callable):
         '''Places a piece of the specified color at the specified position.'''
         x, y = pos[0], pos[1]
 

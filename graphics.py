@@ -129,14 +129,6 @@ class Image(tk.PhotoImage):
         super().__init__(file=f'assets/sprites/{theme}/{file_name}.png')
 
 
-class Frame(tk.PhotoImage):
-    def __init__(self, file_name: str, frame: int, theme: str = None):
-        if theme:
-            super().__init__(file=f'assets/sprites/{theme}/{file_name}{frame+1}.png')
-        else:
-            super().__init__(file=f'assets/sprites/default/{file_name}{frame+1}.png')
-
-
 
 
 if __name__ == '__main__':
