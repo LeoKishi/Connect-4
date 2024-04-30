@@ -20,54 +20,6 @@ class Graphics:
         self.load_image_sequences()
 
 
-    def start_animation(self,
-                        image_label,
-                        image_sequence:list,
-                        loop:bool = False,
-                        fps:int = 15,
-                        current_frame:int = 0
-                        ) -> bool:
-        '''
-        Cycles through a list of images and shows each of them in the image label at set intervals.\n
-        Arguments:
-            display
-                Tkinter main window
-            image_label
-                Tkinter Label class instance
-            image_sequence
-                list of Tkinter Photoimage class instances with the frames of the animation
-            loop
-                repeats the animation cycle
-            fps
-                frames per second
-        '''
-        image_label['image'] = image_sequence[current_frame]
-
-        if current_frame < len(image_sequence)-1:
-            current_frame += 1
-        elif loop:
-            current_frame = 0
-        else:
-            return True
-
-        stop_id = self.display.after(1000//fps,
-                                self.start_animation,
-                                image_label,
-                                image_sequence,
-                                loop,
-                                fps,
-                                current_frame)
-
-
-        self.stop_ids.append(stop_id)
-
-
-    def stop_animation(self):
-        '''Stops all running animations.'''
-        while len(self.stop_ids) > 0:
-            self.display.after_cancel(self.stop_ids.pop())
-
-
     def load_images(self):
         '''Creates instances of image files.'''
 
@@ -120,6 +72,10 @@ class Graphics:
         # fall animation (top)
         self.o_fall_top = self.load_frames(f'assets/sprites/{self.theme}/animated/o_fall_top')
         self.r_fall_top = self.load_frames(f'assets/sprites/{self.theme}/animated/r_fall_top')
+
+        # fall animation (bottom)
+        self.o_fall_bot = self.load_frames(f'assets/sprites/{self.theme}/animated/o_fall_bot')
+        self.r_fall_bot = self.load_frames(f'assets/sprites/{self.theme}/animated/r_fall_bot')
 
         # fall animation
         self.oo_fall = self.load_frames(f'assets/sprites/{self.theme}/animated/oo_fall')

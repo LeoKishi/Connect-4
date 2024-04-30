@@ -11,10 +11,9 @@ def action(row: int, col: int):
     if not game.is_paused:
         if not game.column_is_full(col):
             pos = game.find_bottom((row, col))
-            display.fill_slot(pos, game.turn)
+            display.fill_slot(pos, game.turn, (lambda row=row, col=col: search_and_continue(row,col)))
             game.update_slot(pos)
-            search_and_continue(row,col)
-
+            
 
 def show_indicator(col: int):
     '''Shows the piece indicator on top of the column.'''
@@ -34,12 +33,18 @@ def reset_game(spacebar_pressed: bool):
         game.can_reset = False
 
         display.hide_play_again()
-        display.graphics.stop_animation()
-
         
-        display.fall_animation(game.get_board_state(), game.drop_pieces, start=True)
+        display.fall_animation(game.get_board_state(), game.next_board_state)
 
-        display.after(1100, restart)
+        height = game.get_tallest_collumn()
+        delay = 1100
+
+        if height == 5:
+            delay += 300
+        elif height == 6:
+            delay += 600
+
+        display.after(delay, restart)
 
 
 def winner_found(row:int, col:int, segment:list[list[int,int]]):
@@ -82,7 +87,7 @@ def restart():
 
 # binding user input
 display.bind_click_event(action)
-display.bind_hover_event(show=show_indicator, hide=hide_indicator)
+display.bind_hover_event(show_indicator, hide_indicator)
 display.bind_spacebar_event(reset_game)
 
 

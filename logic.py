@@ -45,6 +45,14 @@ class Logic:
         return True
 
 
+    def get_tallest_collumn(self):
+        '''Returns the height of the tallest column.'''
+        for row in range(6):
+            for col in range(7):
+                if self.array[row][col].player != 0:
+                    return 6-row
+
+
     def next_turn(self) -> bool:
         '''Returns true if the game continues to the next turn, returns false if there are no more valid moves.'''
         self.move_count += 1
@@ -76,19 +84,7 @@ class Logic:
             return False
 
 
-    def get_occupied_slots(self) -> list[tuple[int, int, int]]:
-        '''Returns a list of tuples containing the position of every occupied slot and the player occupying it.'''
-        occupied_slots = []
-
-        for row in range(6):
-            for col in range(7):
-                if self.array[row][col].player != 0:
-                    occupied_slots.append((row, col, self.array[row][col].player))
-
-        return occupied_slots
-
-
-    def find_sequence(self, col:int):
+    def _find_sequence(self, col:int):
         '''Returns the order of the pieces in the given column.'''
         column = [self.array[row][col].player for row in range(6)][::-1]
         sequence = ['']*6
@@ -108,7 +104,7 @@ class Logic:
         columns = []
 
         for col in range(7):
-            columns.append(self.find_sequence(col))
+            columns.append(self._find_sequence(col))
 
         for col in range(7):
             for row in range(6):
@@ -119,23 +115,25 @@ class Logic:
         return self.board_state
 
 
-    def drop_pieces(self):
-        '''Drops the piece by one slot.'''
+    def next_board_state(self):
+        '''Drops all the pieces in the board by one slot.'''
         self.board_state.pop()
         self.board_state.insert(0, ['' for col in range(7)])
 
         return self.board_state
 
 
-    def print_board(self):
-        for row in self.board_state:
-            print(row)
+    def next_column_state(self, pos:tuple[int,int]):
+        '''Returns the coordinates of the slot below the given position.'''
+        if pos == self.find_bottom(pos):
+            return False
+        
+        else:
+            return (pos[0]-1,pos[1])
 
 
 
 
-class Sequence:
-    sequence = []
 
 
 
