@@ -139,15 +139,17 @@ class Display(tk.Tk):
                     if board_state[row][col] == '':
                         self.slots[row][col].set_image(self.graphics.empty_slot)
                     elif _ == 0:
-                        self.slots[row][col].chain(self.graphics.fall_start[board_state[row][col]], fps=15)
+                        self.slots[row][col].chain(self.graphics.fall_start[board_state[row][col]], fps=24)
                     else:
-                        self.slots[row][col].chain(self.graphics.fall[board_state[row][col]], fps=15)
+                        self.slots[row][col].chain(self.graphics.fall[board_state[row][col]], fps=24)
             next_board_state()
 
         for row in range(6):
             for col in range(7):
                 self.slots[row][col].chain_image(self.graphics.empty_slot, timer=1)
                 self.slots[row][col].play()
+
+        playsound('assets/sound/rattle.wav', block=False)
 
 
     def winner_animation(self, winner_segment:list[tuple[int, int]], turn: int):
@@ -197,6 +199,7 @@ class Display(tk.Tk):
 
 
     def drop_animation(self, pos:tuple[int, int], sequence:list[tk.PhotoImage], sequence_bot:list[tk.PhotoImage], image:tk.PhotoImage, func):
+        '''Starts the piece drop animation.'''
         x, y = pos[0], pos[1]
 
         column = [0 for _ in range(pos[0]+1)]

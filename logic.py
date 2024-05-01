@@ -135,10 +135,6 @@ class Logic:
 
 
 
-
-
-
-
 class Slot:
     '''Holds information about a slot in the grid.'''
     def __init__(self, x: int, y: int):

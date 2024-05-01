@@ -1,5 +1,5 @@
 import tkinter as tk
-from glob import glob
+from animation import load_frames
 
 
 class Graphics:
@@ -47,42 +47,42 @@ class Graphics:
         '''Creates instances of image files in a list.'''
 
         # smoke reveal animation
-        self.red_smoke = self.load_frames(f'assets/sprites/default/smoke/red_smoke')
-        self.orange_smoke = self.load_frames(f'assets/sprites/default/smoke/orange_smoke')
+        self.red_smoke = load_frames(f'assets/sprites/default/smoke/red_smoke')
+        self.orange_smoke = load_frames(f'assets/sprites/default/smoke/orange_smoke')
 
         # crown glimmer animation
-        self.red_crown = self.load_frames(f'assets/sprites/default/crown/red_crown')
-        self.orange_crown = self.load_frames(f'assets/sprites/default/crown/orange_crown')
+        self.red_crown = load_frames(f'assets/sprites/default/crown/red_crown')
+        self.orange_crown = load_frames(f'assets/sprites/default/crown/orange_crown')
 
         # indicator animation
-        self.orange_indicator = self.load_frames(f'assets/sprites/{self.theme}/animated/orange_indicator')
-        self.red_indicator = self.load_frames(f'assets/sprites/{self.theme}/animated/red_indicator')
+        self.orange_indicator = load_frames(f'assets/sprites/{self.theme}/animated/orange_indicator')
+        self.red_indicator = load_frames(f'assets/sprites/{self.theme}/animated/red_indicator')
 
         # starting fall animation (top)
-        self.o_fall_top_start = self.load_frames(f'assets/sprites/{self.theme}/animated/o_fall_top_s')
-        self.r_fall_top_start = self.load_frames(f'assets/sprites/{self.theme}/animated/r_fall_top_s')
+        self.o_fall_top_start = load_frames(f'assets/sprites/{self.theme}/animated/o_fall_top_s')
+        self.r_fall_top_start = load_frames(f'assets/sprites/{self.theme}/animated/r_fall_top_s')
 
         # starting fall animation
-        self.oo_fall_start = self.load_frames(f'assets/sprites/{self.theme}/animated/oo_fall_s')
-        self.or_fall_start = self.load_frames(f'assets/sprites/{self.theme}/animated/or_fall_s')
+        self.oo_fall_start = load_frames(f'assets/sprites/{self.theme}/animated/oo_fall_s')
+        self.or_fall_start = load_frames(f'assets/sprites/{self.theme}/animated/or_fall_s')
 
-        self.ro_fall_start = self.load_frames(f'assets/sprites/{self.theme}/animated/ro_fall_s')
-        self.rr_fall_start = self.load_frames(f'assets/sprites/{self.theme}/animated/rr_fall_s')
+        self.ro_fall_start = load_frames(f'assets/sprites/{self.theme}/animated/ro_fall_s')
+        self.rr_fall_start = load_frames(f'assets/sprites/{self.theme}/animated/rr_fall_s')
 
         # fall animation (top)
-        self.o_fall_top = self.load_frames(f'assets/sprites/{self.theme}/animated/o_fall_top')
-        self.r_fall_top = self.load_frames(f'assets/sprites/{self.theme}/animated/r_fall_top')
+        self.o_fall_top = load_frames(f'assets/sprites/{self.theme}/animated/o_fall_top')
+        self.r_fall_top = load_frames(f'assets/sprites/{self.theme}/animated/r_fall_top')
 
         # fall animation (bottom)
-        self.o_fall_bot = self.load_frames(f'assets/sprites/{self.theme}/animated/o_fall_bot')
-        self.r_fall_bot = self.load_frames(f'assets/sprites/{self.theme}/animated/r_fall_bot')
+        self.o_fall_bot = load_frames(f'assets/sprites/{self.theme}/animated/o_fall_bot')
+        self.r_fall_bot = load_frames(f'assets/sprites/{self.theme}/animated/r_fall_bot')
 
         # fall animation
-        self.oo_fall = self.load_frames(f'assets/sprites/{self.theme}/animated/oo_fall')
-        self.or_fall = self.load_frames(f'assets/sprites/{self.theme}/animated/or_fall')
+        self.oo_fall = load_frames(f'assets/sprites/{self.theme}/animated/oo_fall')
+        self.or_fall = load_frames(f'assets/sprites/{self.theme}/animated/or_fall')
 
-        self.ro_fall = self.load_frames(f'assets/sprites/{self.theme}/animated/ro_fall')
-        self.rr_fall = self.load_frames(f'assets/sprites/{self.theme}/animated/rr_fall')
+        self.ro_fall = load_frames(f'assets/sprites/{self.theme}/animated/ro_fall')
+        self.rr_fall = load_frames(f'assets/sprites/{self.theme}/animated/rr_fall')
 
         self.fall_start = {'r':self.r_fall_top_start,
                             'o':self.o_fall_top_start,
@@ -97,31 +97,6 @@ class Graphics:
                     'ro':self.ro_fall,
                     'oo':self.oo_fall,
                     'or':self.or_fall}
-
-
-    def load_frames(self, directory: str) -> list[tk.PhotoImage]:
-        '''Create a list with every frame of the animation.'''
-        frames = list()
-
-        for file in self._get_files(directory):
-            frames.append(tk.PhotoImage(file=f'{directory}/{file}.png'))
-
-        return frames
-
-
-    def _get_files(self, directory: str) -> list[str]:
-        '''Returns a sorted list with the name of every file in the directory.'''
-        file_names = list()
-
-        # list all png files in directory
-        for name in glob(f'{directory}/*.png'):
-            file_names.append(name[len(directory)+1:-4])
-        
-        # sort files by frame number
-        name_len = len(file_names[0][:-1])
-        file_names.sort(key=lambda frame: int(frame[name_len:]))
-
-        return file_names
 
 
 class Image(tk.PhotoImage):

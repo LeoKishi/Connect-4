@@ -1,5 +1,31 @@
 import tkinter as tk
+from glob import glob
 from typing import Callable
+
+
+def load_frames(directory: str) -> list[tk.PhotoImage]:
+    '''Create a list with every frame of the animation.'''
+    frames = list()
+
+    for file in _get_files(directory):
+        frames.append(tk.PhotoImage(file=f'{directory}/{file}.png'))
+
+    return frames
+
+
+def _get_files(directory: str) -> list[str]:
+    '''Returns a sorted list with the name of every file in the directory.'''
+    file_names = list()
+
+    # list all png files in directory
+    for name in glob(f'{directory}/*.png'):
+        file_names.append(name[len(directory)+1:-4])
+    
+    # sort files by frame number
+    name_len = len(file_names[0][:-1])
+    file_names.sort(key=lambda frame: int(frame[name_len:]))
+
+    return file_names
 
 
 class Sprite(tk.Label):
