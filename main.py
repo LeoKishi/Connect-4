@@ -10,11 +10,8 @@ bot = Bot()
 
 def action(row: int, col: int, bot_action:bool = False):
     '''Places a piece in the selected column.'''
-    if not game.is_paused and (game.can_click or bot_action):
-        if game.column_is_full(col):
-            return
+    if not (game.is_paused and (game.can_click or bot_action)) and not game.column_is_full(col):
         pos = game.find_bottom((row, col))
-
         game.can_click = False
 
         def timed_call():
@@ -33,18 +30,7 @@ def action(row: int, col: int, bot_action:bool = False):
 
 def bot_move():
     pos = bot.make_move(game.array)
-    x, y = pos[0], pos[1]
-
-    print('bot move')
-    print(pos)
-
-    action(x, y, bot_action=True)
-
-
-
-
-
-    ...
+    action(pos[0], pos[1], bot_action=True)
 
 
 def show_indicator(col: int):

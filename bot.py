@@ -8,19 +8,21 @@ class Bot:
 
 
     def _set_default(self, game_array:list[list]):
+        '''Redefines the lists.'''
         self.array = game_array
         self.weighted_board = [[0 for col in range(7)] for row in range(6)]
 
 
-    def _get_weight(self, player:int):
+    def _get_board_weight(self, player:int):
+        '''Adds weight to the slots and registers the weights in the 'weighted_board' attribute.'''
         positions = self._get_piece(player)
 
         for pos in positions:
-            self._horizontal_vertical(pos, player)
-            self._diagonal(pos, player)
+            self._directions(pos, player)
 
 
     def _get_piece(self, player:int) -> list[tuple[int, int]]:
+        '''Returns the position of every piece of the specified player.'''
         pos = []
 
         for row in range(6):
@@ -31,15 +33,12 @@ class Bot:
         return pos
 
 
-    def _horizontal_vertical(self, pos:tuple[int, int], player:int):
+    def _directions(self, pos:tuple[int, int], player:int):
+        '''Searches for every direction from the given position.'''
         x, y = pos[0], pos[1]
         self._set_weight([(x-i,y) for i in range(1,4) if self._in_bounds(x-i,y)], player) # up
         self._set_weight([(x,y+i) for i in range(1,4) if self._in_bounds(x,y+i)], player) # right
         self._set_weight([(x,y-i) for i in range(1,4) if self._in_bounds(x,y-i)], player) # left
-
-
-    def _diagonal(self, pos:tuple[int, int], player:int):
-        x, y = pos[0], pos[1]
         self._set_weight([(x-i,y+i) for i in range(1,4) if self._in_bounds(x-i,y+i)], player) # up right
         self._set_weight([(x-i,y-i) for i in range(1,4) if self._in_bounds(x-i,y-i)], player) # up left
         self._set_weight([(x+i,y+i) for i in range(1,4) if self._in_bounds(x+i,y+i)], player) # down right
@@ -47,6 +46,7 @@ class Bot:
 
 
     def _set_weight(self, line:list[tuple[int, int]], player:int):
+        '''Registers the weight in the 'weighted_board' attribute.'''
         weighted = list()
 
         can_complete = self._get_individual_weight(line, weighted, player)
@@ -63,6 +63,7 @@ class Bot:
 
 
     def _get_individual_weight(self, line:list[tuple[int, int]], weighted:list, player:int) -> bool:
+        '''Lists the individual slots and their weights. Returns True if a line of 4 pieces can be formed.'''
         if len(line) < 3:
             return
 
@@ -101,6 +102,7 @@ class Bot:
 
 
     def _is_floating(self, pos:tuple[int, int]) -> bool:
+        '''Returns True if the given position has no pieces below it, returns False otherwise.'''
         x, y = pos[0], pos[1]
         if (x < 5) and self.array[x+1][y].player == 0:
             return True
@@ -109,6 +111,7 @@ class Bot:
 
 
     def _in_bounds(self, x:int = None, y:int = None) -> bool:
+        '''Returns True if the given coordinates are within the grid boundaries, returns False otherwise.'''
         inside = bool
 
         if not y:
@@ -122,20 +125,13 @@ class Bot:
     
 
     def make_move(self, game_array:list[list]) -> tuple[int, int]:
+        '''Returns a non-random valid position.'''
         self._set_default(game_array)
 
-        self._get_weight(2)
+        self._get_board_weight(2)
         atk_moves = self._get_weighted_pos()
-
-        print()
-        print('atk weight')
-        self.print_weight()
-
-        self._get_weight(1)
+        self._get_board_weight(1)
         def_moves = self._get_weighted_pos()
-
-        print('def weight')
-        self.print_weight()
 
         strong_atk = atk_moves[1]
         strong_def = def_moves[1]
@@ -159,6 +155,7 @@ class Bot:
 
 
     def _get_weighted_pos(self) -> tuple[list, list]:
+        '''Returns the weighted slots, separated by their respective weights.'''
         weak = list()
         strong = list()
 
@@ -174,6 +171,7 @@ class Bot:
 
 
     def _get_incomplete_columns(self) -> list[tuple]:
+        '''Returns the position of the columns that are not full yet.'''
         columns = []
 
         for col in range(7):
@@ -181,18 +179,7 @@ class Bot:
                 columns.append((0, col))
 
         return columns
-    
 
-    def print_weight(self):
-        for row in self.weighted_board:
-            print(row)
-        print()
-
-    
-    def print_board(self):
-        for row in self.array:
-            print(row)
-        print()
 
 
 
