@@ -4,11 +4,12 @@ from copy import deepcopy
 
 class Logic:
     def __init__(self):
-        self.turn = randint(1,2)
+        self.turn = 1
         self.move_count = 0
         self.is_paused = False
         self.can_reset = False
         self.can_click = True
+        self.bot_is_enabled = True
         self.search = Search()
 
         # 2D list to hold information about each slot

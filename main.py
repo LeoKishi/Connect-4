@@ -1,27 +1,51 @@
 from gui import Display
 from logic import Logic
+from bot import Bot
 
 
 display = Display(theme='dark')
 game = Logic()
+bot = Bot()
 
 
-def action(row: int, col: int):
+def action(row: int, col: int, bot_action:bool = False):
     '''Places a piece in the selected column.'''
-    def timed_call():
-        if not search_and_continue(row,col):
-            display.draw_indicator(game.turn, game.column_is_full)
-        game.can_click = True
+    if not game.is_paused and (game.can_click or bot_action):
+        if game.column_is_full(col):
+            return
+        pos = game.find_bottom((row, col))
 
-    if not game.is_paused and game.can_click:
-        if not game.column_is_full(col):
-            pos = game.find_bottom((row, col))
+        game.can_click = False
 
-            game.can_click = False
-            display.fill_slot(pos, game.turn, timed_call)
-            
-            game.update_slot(pos)
-            
+        def timed_call():
+            if not search_and_continue(row, col):
+                display.draw_indicator(game.turn, game.column_is_full)
+            if bot_action:
+                game.can_click = True
+
+        display.fill_slot(pos, game.turn, timed_call)
+
+        if game.turn == 1 and game.bot_is_enabled:
+            display.after(400, bot_move)
+        
+        game.update_slot(pos)
+
+
+def bot_move():
+    pos = bot.make_move(game.array)
+    x, y = pos[0], pos[1]
+
+    print('bot move')
+    print(pos)
+
+    action(x, y, bot_action=True)
+
+
+
+
+
+    ...
+
 
 def show_indicator(col: int):
     '''Shows the piece indicator on top of the column.'''
@@ -30,7 +54,7 @@ def show_indicator(col: int):
         display.draw_indicator(game.turn, game.column_is_full)
 
 
-def hide_indicator(col: int):
+def hide_indicator():
     '''Removes the piece indicator from the column.'''
     if not game.is_paused:
         display.erase_indicator(game.column_is_full)
@@ -55,7 +79,7 @@ def reset_game(spacebar_pressed: bool):
         display.after(delay, restart)
 
 
-def winner_found(row:int, col:int, segment:list[list[int,int]]):
+def winner_found(segment:list[list[int,int]]):
     '''Stops the game and shows the winner.'''
     game.is_paused = True
 
@@ -67,8 +91,8 @@ def search_and_continue(row: int, col: int):
     '''Searches for a winner and starts next turn if none is found.'''
     
     if segment := game.search_winner():
-        hide_indicator(col)
-        winner_found(row, col, segment)
+        hide_indicator()
+        winner_found(segment)
         return True
     else:
         if not game.next_turn():
@@ -89,7 +113,13 @@ def restart():
     display.reset()
     game.reset()
     game.is_paused = False
-    game.can_click = True
+
+    if game.turn == 1:
+        game.can_click = True
+    else:
+        bot_move()
+
+
     
 
 # binding user input
@@ -98,15 +128,23 @@ display.bind_hover_event(show_indicator, hide_indicator)
 display.bind_spacebar_event(reset_game)
 
 
+def main():
+    ...
+
+
 
 
 if __name__ == '__main__':
+
+
+    
+    main()
+
+
+
+
     display.mainloop()
-
-
-
     ...
-
 
 
 

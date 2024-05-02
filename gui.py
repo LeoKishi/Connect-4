@@ -123,7 +123,7 @@ class Display(tk.Tk):
         for row in range(6):
             for col in range(7):
                 self.slots[row][col].bind('<Enter>', lambda event, col=col: show(col))
-                self.slots[row][col].bind('<Leave>', lambda event, col=col: hide(col))
+                self.slots[row][col].bind('<Leave>', lambda event, col=col: hide())
 
 
     def bind_spacebar_event(self, reset):
