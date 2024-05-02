@@ -10,6 +10,8 @@ class Logic:
         self.can_reset = False
         self.can_click = True
         self.bot_is_enabled = True
+        self.red_score = 0
+        self.orange_score = 0
         self.search = Search()
 
         # 2D list to hold information about each slot

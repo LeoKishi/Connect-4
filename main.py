@@ -10,7 +10,10 @@ bot = Bot()
 
 def action(row: int, col: int, bot_action:bool = False):
     '''Places a piece in the selected column.'''
-    if not (game.is_paused and (game.can_click or bot_action)) and not game.column_is_full(col):
+    if not game.is_paused and (game.can_click or bot_action):
+        if game.column_is_full(col):
+            return
+        
         pos = game.find_bottom((row, col))
         game.can_click = False
 
@@ -69,6 +72,13 @@ def winner_found(segment:list[list[int,int]]):
     '''Stops the game and shows the winner.'''
     game.is_paused = True
 
+    if game.turn == 1:
+        game.red_score += 1
+        display.top_frame.add_score(game.turn, game.red_score)
+    elif game.turn == 2:
+        game.orange_score += 1
+        display.top_frame.add_score(game.turn, game.orange_score)
+
     display.winner_animation(segment, game.turn)
     display.after(800, enable_reset)
     
@@ -84,6 +94,7 @@ def search_and_continue(row: int, col: int):
         if not game.next_turn():
             enable_reset(tie=True)
             game.is_paused = True
+            return True
         return False
 
 
