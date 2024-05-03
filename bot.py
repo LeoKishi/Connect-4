@@ -29,7 +29,7 @@ class Bot:
             for col in range(7):
                 if self.array[row][col].player == player:
                     pos.append((row,col))
-        
+                    
         return pos
 
 
@@ -155,7 +155,7 @@ class Bot:
 
 
     def _get_weighted_pos(self) -> tuple[list, list]:
-        '''Returns the weighted slots, separated by their respective weights.'''
+        '''Returns the positions of the weighted slots, separated by their respective weights.'''
         weak = list()
         strong = list()
 
@@ -171,7 +171,7 @@ class Bot:
 
 
     def _get_incomplete_columns(self) -> list[tuple]:
-        '''Returns the position of the columns that are not full yet.'''
+        '''Returns the positions of incomplete columns.'''
         columns = []
 
         for col in range(7):
@@ -184,12 +184,6 @@ class Bot:
 
 
 if __name__ == '__main__':
-
-
-
-
-
-
 
 
     ...

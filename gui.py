@@ -22,8 +22,12 @@ class Display(tk.Tk):
 
         if theme == 'dark':
             self.configure(bg= '#201e23')
+            self.bg = '#201e23'
+            self.fg = 'white'
         elif theme == 'light':
             self.configure(bg= 'white')
+            self.bg = 'white'
+            self.fg = '#201e23'
 
         # 2D list with the image labels of each slot
         self.slots = [[col for col in range(7)] for row in range(6)]
@@ -41,21 +45,15 @@ class Display(tk.Tk):
         self.main_frame = tk.Frame(self)
 
         self.top_wall_frame = Wall(self.main_frame, self.graphics.top_wall)
-        self.center_frame = tk.Frame(self.main_frame)
 
+        self.center_frame = tk.Frame(self.main_frame)
         self.left_wall_frame = Wall(self.center_frame, self.graphics.left_wall).pack(side=tk.LEFT)
         self.grid = Grid(self, self.center_frame, self.graphics.empty_slot, self.slots).pack(side=tk.LEFT)
         self.right_wall_frame = Wall(self.center_frame, self.graphics.right_wall).pack(side=tk.LEFT)
 
         self.bottom_wall_frame = Wall(self.main_frame, self.graphics.bottom_wall)
 
-        if theme == 'dark':
-            bg, fg = '#201e23', 'white'
-
-        elif theme == 'light':
-            bg, fg = 'white', '#201e23'
-
-        self.top_frame = PlayAgain(self.main_frame, bg=bg, fg=fg)
+        self.top_frame = PlayAgain(self.main_frame, bg=self.bg, fg=self.fg)
         self._create_piece_view()
 
 
@@ -71,7 +69,7 @@ class Display(tk.Tk):
         self.center_frame.pack(side=tk.BOTTOM)
         self.top_wall_frame.pack(side=tk.BOTTOM)
 
-        self.hide_play_again()
+        self.hide_endscreen()
 
 
     def _create_piece_view(self):
@@ -83,21 +81,21 @@ class Display(tk.Tk):
         ImgLabel(self.piece_view, image=self.graphics.empty_space_edge).grid(row=0, column=8)
 
     # gameover text
-    def show_play_again(self, winner: str):
+    def show_endscreen(self, winner: str):
         '''Show the play again text.'''
         if winner == 0:
-            self.top_frame.winner['text'] = 'Tie!'
+            self.top_frame.winner_box.winner['text'] = 'Tie!'
         if winner == 1:
-            self.top_frame.winner['text'] = 'Red wins!'
+            self.top_frame.winner_box.winner['text'] = 'Red wins!'
         elif winner == 2:
-            self.top_frame.winner['text'] = 'Orange wins!'
+            self.top_frame.winner_box.winner['text'] = 'Orange wins!'
 
         self.piece_view.pack_forget()
         self.top_frame.pack(side=tk.TOP, fill='both', expand=True)
         self.top_frame.pack_propagate(0)
 
 
-    def hide_play_again(self):
+    def hide_endscreen(self):
         '''Hides the play again text.'''
         self.top_frame.pack_forget()
         self.piece_view.pack(side=tk.TOP, fill='none', expand=False)
@@ -302,64 +300,57 @@ class PlayAgain(tk.Frame):
         self.bg = bg
         self.fg = fg
 
-        self.frame1 = tk.Frame(self, bg=bg)
-        self.frame2 = tk.Frame(self, bg=bg)
-        self.frame3 = tk.Frame(self, bg=bg)
-
-        self.box1 = tk.Frame(self.frame1, bg=bg)
-        self.box2 = tk.Frame(self.frame3, bg=bg)
-
-        self.player1 = tk.Label(self.box1, text='Player 1\nscore:', font=('Calibri', 12), bg=bg, fg=fg)
-        self.score1 = tk.Label(self.box1, text='0',font=('Calibri', 15), bg=bg, fg=fg)
-
-        self.player2 = tk.Label(self.box2, text='BOT\nscore:',font=('Calibri', 12), bg=bg, fg=fg)
-        self.score2 = tk.Label(self.box2, text='0', font=('Calibri', 15), bg=bg, fg=fg)
+        self.player_frame = tk.Frame(self, bg=bg)
+        self.player_frame.pack(fill='both', padx=(40,0), side=tk.LEFT, expand=True)
+        self.player_frame.pack_propagate(0)
+        self.score_box1 = ScoreBox(self.player_frame, name='Player\nscore:', bg=bg, fg=fg)
+        self.score_box1.pack(side=tk.LEFT, padx=(30,0), pady=(35,0))
         
-        self.winner = tk.Label(self.frame2, font=('Calibri', 17), bg=bg, fg=fg)
+        self.bot_frame = tk.Frame(self, bg=bg)
+        self.bot_frame.pack(fill='both', padx=(0,40), side=tk.RIGHT, expand=True)
+        self.bot_frame.pack_propagate(0)
+        self.score_box2 = ScoreBox(self.bot_frame, name='Computer\nscore:', bg=bg, fg=fg)
+        self.score_box2.pack(side=tk.RIGHT, padx=(0,30), pady=(35,0))
 
-        self.play_again = tk.Label(self.frame2, text='Press SPACE to play again',
+        self.play_again_frame = tk.Frame(self, bg=bg)
+        self.play_again_frame.pack(fill='both', side=tk.LEFT, expand=True)
+        self.play_again_frame.pack_propagate(0)
+        self.winner_box = WinnerBox(self.play_again_frame, bg=bg, fg=fg)
+        self.winner_box.pack(side=tk.TOP)
+
+    def add_score(self, player:int, score:int):
+        if player == 1:
+            self.score_box1.score['text'] = score
+        elif player == 2:
+            self.score_box2.score['text'] = score
+
+
+class ScoreBox(tk.Frame):
+    def __init__(self, parent, name, bg, fg):
+        super().__init__(parent, bg=bg)
+
+        self.player = tk.Label(self, text=name, font=('Calibri', 12), bg=bg, fg=fg)
+        self.score = tk.Label(self, text='0',font=('Calibri', 15), bg=bg, fg=fg)
+
+        self.score.pack(side=tk.BOTTOM)
+        self.player.pack(side=tk.BOTTOM)
+
+
+class WinnerBox(tk.Frame):
+    def __init__(self, parent, bg, fg):
+        super().__init__(parent, bg=bg)
+
+        self.winner = tk.Label(parent, font=('Calibri', 17), bg=bg, fg=fg)
+        self.play_again = tk.Label(parent, text='Press SPACE to play again',
                                    font=('Calibri', 12), bg=bg, fg=fg)
-
-        self.score1.pack(side=tk.BOTTOM)
-        self.player1.pack(side=tk.BOTTOM)
-
-        self.score2.pack(side=tk.BOTTOM)
-        self.player2.pack(side=tk.BOTTOM)
 
         self.winner.pack(side=tk.TOP, pady=(30,0))
         self.play_again.pack(side=tk.TOP, pady=(30,0))
 
-        self.box1.pack(side=tk.LEFT, padx=(30,0), pady=(35,0))
-        self.box2.pack(side=tk.RIGHT, padx=(0,30), pady=(35,0))
-
-        self.frame1.pack(fill='both', padx=(40,0), side=tk.LEFT, expand=True)
-        self.frame1.pack_propagate(0)
-        self.frame2.pack(fill='both', side=tk.LEFT, expand=True)
-        self.frame2.pack_propagate(0)
-        self.frame3.pack(fill='both', padx=(0,40), side=tk.RIGHT, expand=True)
-        self.frame3.pack_propagate(0)
-
-
-    def add_score(self, player:int, score:int):
-        if player == 1:
-            self.score1['text'] = score
-        elif player == 2:
-            self.score2['text'] = score
-
-
-
-def main():
-    display = Display('light')
-    
-
-
-
-
-
-
-    display.mainloop()
 
 
 
 if __name__ == '__main__':
-    main()
+    
+
+    ...

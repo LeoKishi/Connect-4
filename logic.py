@@ -136,8 +136,6 @@ class Logic:
             return (pos[0]-1,pos[1])
 
 
-
-
 class Slot:
     '''Holds information about a slot in the grid.'''
     def __init__(self, x: int, y: int):
@@ -250,7 +248,5 @@ class Search:
 
 if __name__ == '__main__':
     
-
-
 
     ...

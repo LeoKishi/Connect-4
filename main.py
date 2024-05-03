@@ -54,7 +54,7 @@ def reset_game(spacebar_pressed: bool):
     if spacebar_pressed and game.can_reset:
         game.can_reset = False
 
-        display.hide_play_again()
+        display.hide_endscreen()
         display.fall_animation(game.get_board_state(), game.next_board_state)
 
         height = game.get_tallest_collumn()
@@ -85,7 +85,6 @@ def winner_found(segment:list[list[int,int]]):
 
 def search_and_continue(row: int, col: int):
     '''Searches for a winner and starts next turn if none is found.'''
-    
     if segment := game.search_winner():
         hide_indicator()
         winner_found(segment)
@@ -99,14 +98,16 @@ def search_and_continue(row: int, col: int):
 
 
 def enable_reset(tie:bool = False):
+    '''Allows the player to restart the game.'''
     if tie:
-        display.show_play_again(0)
+        display.show_endscreen(0)
     else:
-        display.show_play_again(game.turn)
+        display.show_endscreen(game.turn)
     game.can_reset = True
 
 
 def restart():
+    '''Restarts the game.'''
     display.reset()
     game.reset()
     game.is_paused = False
@@ -125,23 +126,9 @@ display.bind_hover_event(show_indicator, hide_indicator)
 display.bind_spacebar_event(reset_game)
 
 
-def main():
-    ...
-
-
 
 
 if __name__ == '__main__':
-
-
-    
-    main()
-
-
-
-
     display.mainloop()
+    
     ...
-
-
-
