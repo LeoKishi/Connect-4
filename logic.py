@@ -2,7 +2,7 @@ from random import randint
 from copy import deepcopy
 
 
-class Logic:
+class GameData:
     def __init__(self):
         self.turn = 1
         self.move_count = 0
@@ -21,6 +21,7 @@ class Logic:
         self.board_state = [['' for col in range(7)] for row in range(6)]
 
 
+class Logic(GameData):
     def reset(self):
         self.turn = randint(1,2)
         self.move_count = 0
