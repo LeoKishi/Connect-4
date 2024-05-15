@@ -146,7 +146,7 @@ class Display(tk.Tk):
                 self.slots[row][col].chain_image(self.graphics.empty_slot, timer=1)
                 self.slots[row][col].play()
 
-        playsound('assets/sound/rattle.wav', block=False)
+        playsound('Connect-4/assets/sound/rattle.wav', block=False)
 
 
     def winner_animation(self, winner_segment:list[tuple[int, int]], turn: int):
@@ -159,7 +159,7 @@ class Display(tk.Tk):
             smoke = self.graphics.orange_smoke
             crown = self.graphics.orange_crown
 
-        playsound('assets/sound/crown.wav', block=False)
+        playsound('Connect-4/assets/sound/crown.wav', block=False)
 
         for pos in winner_segment:
             x, y = pos[0], pos[1]
@@ -237,9 +237,9 @@ class Display(tk.Tk):
             sequence_bot = self.graphics.o_fall_bot
             image = self.graphics.orange_slot
 
-        sounds = ['assets/sound/click1.wav',
-                  'assets/sound/click2.wav',
-                  'assets/sound/click3.wav']
+        sounds = ['Connect-4/assets/sound/click1.wav',
+                  'Connect-4/assets/sound/click2.wav',
+                  'Connect-4/assets/sound/click3.wav']
 
         playsound(choice(sounds), block=False)
         self.drop_animation(pos, sequence, sequence_bot, image, func)
