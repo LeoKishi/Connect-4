@@ -1,5 +1,4 @@
 from random import choice
-from random import randint
 
 
 class Bot:
@@ -125,7 +124,7 @@ class Bot:
     
 
     def make_move(self, game_array:list[list]) -> tuple[int, int]:
-        '''Returns a non-random valid position.'''
+        '''Returns the best valid move to play.'''
         self._set_default(game_array)
 
         self._get_board_weight(2)
