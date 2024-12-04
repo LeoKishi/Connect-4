@@ -16,6 +16,7 @@ def action(row: int, col: int, bot_action:bool = False):
         
         pos = game.find_bottom((row, col))
         game.can_click = False
+        game.update_slot(pos)
 
         def timed_call():
             if not search_and_continue(row, col):
@@ -28,7 +29,7 @@ def action(row: int, col: int, bot_action:bool = False):
         if game.turn == 1 and game.bot_is_enabled:
             display.after(400, bot_move)
         
-        game.update_slot(pos)
+        
 
 
 def bot_move():
