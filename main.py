@@ -85,7 +85,7 @@ def winner_found(segment:list[list[int,int]]):
 
 def search_and_continue(row: int, col: int):
     '''Searches for a winner and starts next turn if none is found.'''
-    if segment := game.search_winner():
+    if segment := game.search_winner(row, col):
         hide_indicator()
         winner_found(segment)
         return True
